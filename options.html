@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Summarizer for Kids - Settings</title>
+  <link rel="stylesheet" href="css/options.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>🎬 YouTube Summarizer for Kids</h1>
+      <p class="subtitle">Extension Settings</p>
+    </header>
+
+    <main class="main-content">
+      <!-- API Configuration -->
+      <section class="section">
+        <div class="section-header">
+          <h2>🔑 API Configuration</h2>
+          <p>Configure your Gemini API key to enable video summarization</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="api-key">Gemini API Key:</label>
+          <div class="input-group">
+            <input type="password" id="api-key" placeholder="Enter your Gemini API key">
+            <button id="toggle-key-visibility" class="toggle-btn" title="Show/Hide API Key">👁️</button>
+          </div>
+          <div class="help-text">
+            <p>Don't have an API key? <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener">Get one free from Google AI Studio</a></p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <button id="test-api-key" class="secondary-btn">🧪 Test API Key</button>
+          <div id="api-test-result" class="test-result hidden"></div>
+        </div>
+      </section>
+
+      <!-- Age Settings -->
+      <section class="section">
+        <div class="section-header">
+          <h2>👶 Default Age Group</h2>
+          <p>Set the default age group for content adaptation</p>
+        </div>
+        
+        <div class="form-group">
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="default-age" value="3-5">
+              <span class="radio-custom"></span>
+              <div class="radio-content">
+                <strong>3-5 years</strong>
+                <small>Very simple words and concepts</small>
+              </div>
+            </label>
+            
+            <label class="radio-option">
+              <input type="radio" name="default-age" value="6-8" checked>
+              <span class="radio-custom"></span>
+              <div class="radio-content">
+                <strong>6-8 years</strong>
+                <small>Elementary school level explanations</small>
+              </div>
+            </label>
+            
+            <label class="radio-option">
+              <input type="radio" name="default-age" value="9-12">
+              <span class="radio-custom"></span>
+              <div class="radio-content">
+                <strong>9-12 years</strong>
+                <small>More detailed but still kid-friendly</small>
+              </div>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Accessibility -->
+      <section class="section">
+        <div class="section-header">
+          <h2>♿ Accessibility Features</h2>
+          <p>Options to make the extension more accessible</p>
+        </div>
+        
+        <div class="form-group">
+          <label class="checkbox-option">
+            <input type="checkbox" id="large-fonts">
+            <span class="checkbox-custom"></span>
+            <div class="checkbox-content">
+              <strong>Large Fonts</strong>
+              <small>Use larger text in summaries</small>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-option">
+            <input type="checkbox" id="high-contrast">
+            <span class="checkbox-custom"></span>
+            <div class="checkbox-content">
+              <strong>High Contrast Mode</strong>
+              <small>Increase contrast for better visibility</small>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-option">
+            <input type="checkbox" id="text-to-speech">
+            <span class="checkbox-custom"></span>
+            <div class="checkbox-content">
+              <strong>Text-to-Speech (Coming Soon)</strong>
+              <small>Enable audio reading of summaries</small>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <!-- Language Settings -->
+      <section class="section">
+        <div class="section-header">
+          <h2>🌍 Language Settings</h2>
+          <p>Choose the language for summaries</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="summary-language">Summary Language:</label>
+          <select id="summary-language">
+            <option value="en" selected>English</option>
+            <option value="es">Spanish (Español)</option>
+            <option value="fr">French (Français)</option>
+            <option value="de">German (Deutsch)</option>
+            <option value="it">Italian (Italiano)</option>
+            <option value="pt">Portuguese (Português)</option>
+            <option value="zh">Chinese (中文)</option>
+            <option value="ja">Japanese (日本語)</option>
+            <option value="ko">Korean (한국어)</option>
+          </select>
+          <div class="help-text">
+            <p>Note: Video must have captions in the selected language</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Advanced Settings -->
+      <section class="section">
+        <div class="section-header">
+          <h2>⚙️ Advanced Settings</h2>
+          <p>Fine-tune the extension behavior</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="max-topics">Maximum Topics per Video:</label>
+          <input type="range" id="max-topics" min="2" max="8" value="5" class="range-input">
+          <div class="range-value">5 topics</div>
+          <div class="help-text">
+            <p>More topics = more detailed but longer summaries</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="summary-length">Summary Length:</label>
+          <select id="summary-length">
+            <option value="short">Short (2-3 sentences)</option>
+            <option value="medium" selected>Medium (4-5 sentences)</option>
+            <option value="long">Long (6-8 sentences)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-option">
+            <input type="checkbox" id="auto-summarize" checked>
+            <span class="checkbox-custom"></span>
+            <div class="checkbox-content">
+              <strong>Auto-detect new videos</strong>
+              <small>Show summary button when navigating to new videos</small>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button id="save-settings" class="primary-btn">💾 Save Settings</button>
+        <button id="reset-settings" class="danger-btn">🔄 Reset to Defaults</button>
+      </div>
+
+      <!-- Status Messages -->
+      <div id="save-status" class="status-message hidden"></div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="https://github.com/adityasoni99/YoutubeSummarizerKids" target="_blank" rel="noopener">📖 Documentation</a>
+        <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener">🔑 Get API Key</a>
+        <a href="#" id="export-settings">📤 Export Settings</a>
+        <a href="#" id="import-settings">📥 Import Settings</a>
+      </div>
+      <div class="footer-info">
+        <p>Version 1.0.0 | Made with ❤️ for kids and parents</p>
+      </div>
+    </footer>
+
+    <!-- Hidden file input for importing settings -->
+    <input type="file" id="import-file" accept=".json" style="display: none;">
+  </div>
+
+  <script src="js/options.js"></script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Summarizer Extension - Test Page</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            line-height: 1.6;
+        }
+
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .test-section {
+            background: white;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #4ecdc4;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .test-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .status {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 12px;
+        }
+
+        .status.pass { background: #28a745; }
+        .status.fail { background: #dc3545; }
+        .status.warning { background: #ffc107; color: #333; }
+        .status.unknown { background: #6c757d; }
+
+        .test-button {
+            background: linear-gradient(135deg, #ff6b6b, #ff9f43);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .test-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            background: #e8f5e8;
+            border: 1px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .error {
+            background: #ffeaea;
+            border: 1px solid #dc3545;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .code {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .youtube-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .youtube-link {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .youtube-link:hover {
+            border-color: #ff6b6b;
+            transform: scale(1.02);
+        }
+
+        .youtube-link h4 {
+            margin: 0 0 8px 0;
+            color: #ff6b6b;
+        }
+
+        .youtube-link p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎬 YouTube Summarizer for Kids</h1>
+        <p>Extension Testing & Validation Tool</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Extension Validation</h2>
+        <p>This tool helps verify that your Chrome Extension is properly installed and configured.</p>
+        
+        <div class="test-item" id="extension-test">
+            <div class="status unknown" id="ext-status">?</div>
+            <div>
+                <strong>Extension Installed</strong>
+                <div>Checking if the YouTube Summarizer extension is loaded...</div>
+            </div>
+        </div>
+
+        <div class="test-item" id="permissions-test">
+            <div class="status unknown" id="perm-status">?</div>
+            <div>
+                <strong>Required Permissions</strong>
+                <div>Verifying extension has necessary permissions...</div>
+            </div>
+        </div>
+
+        <div class="test-item" id="storage-test">
+            <div class="status unknown" id="storage-status">?</div>
+            <div>
+                <strong>Storage Access</strong>
+                <div>Testing Chrome storage API access...</div>
+            </div>
+        </div>
+
+        <div class="test-item" id="api-test">
+            <div class="status unknown" id="api-status">?</div>
+            <div>
+                <strong>API Configuration</strong>
+                <div>Checking Gemini API key configuration...</div>
+            </div>
+        </div>
+
+        <button class="test-button" onclick="runAllTests()">🧪 Run All Tests</button>
+        <button class="test-button" onclick="openExtensionOptions()">⚙️ Open Extension Options</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📺 Test YouTube Videos</h2>
+        <p>Try the extension on these educational videos that are known to work well:</p>
+        
+        <div class="youtube-links">
+            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" class="youtube-link">
+                <h4>🌍 How Earth Works</h4>
+                <p>Educational content about our planet - great for testing the extension</p>
+            </a>
+            
+            <a href="https://www.youtube.com/watch?v=YQHsXMglC9A" target="_blank" class="youtube-link">
+                <h4>🔬 Science Experiments</h4>
+                <p>Kid-friendly science demonstrations with clear explanations</p>
+            </a>
+            
+            <a href="https://www.youtube.com/watch?v=rJTqDduBNJM" target="_blank" class="youtube-link">
+                <h4>🦕 Dinosaur Facts</h4>
+                <p>Educational dinosaur content perfect for young learners</p>
+            </a>
+            
+            <a href="https://www.youtube.com/watch?v=fGlOHuaKUPo" target="_blank" class="youtube-link">
+                <h4>🌌 Space Exploration</h4>
+                <p>Space documentaries with good captions for summarization</p>
+            </a>
+        </div>
+
+        <div class="info-box">
+            <strong>💡 Testing Tips:</strong>
+            <ul>
+                <li>Look for the "🎬 Kid-Friendly Summary" button on YouTube videos</li>
+                <li>Try different age group settings (3-5, 6-8, 9-12 years)</li>
+                <li>Test with videos that have auto-generated captions</li>
+                <li>Check that summaries are age-appropriate and understandable</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🛠️ Troubleshooting</h2>
+        
+        <div id="troubleshooting-results"></div>
+
+        <button class="test-button" onclick="runDiagnostics()">🔧 Run Diagnostics</button>
+        <button class="test-button" onclick="exportLogs()">📋 Export Test Results</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📚 Quick Start Guide</h2>
+        
+        <div class="info-box">
+            <h3>🚀 How to Use the Extension</h3>
+            <ol>
+                <li><strong>Install:</strong> Load the extension in Chrome (chrome://extensions/)</li>
+                <li><strong>Configure:</strong> Add your Gemini API key in extension options</li>
+                <li><strong>Visit YouTube:</strong> Go to any educational video with captions</li>
+                <li><strong>Summarize:</strong> Click the "Kid-Friendly Summary" button</li>
+                <li><strong>Enjoy:</strong> Read the age-appropriate summary and Q&A!</li>
+            </ol>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠️ Important Notes:</strong>
+            <ul>
+                <li>You need a valid Gemini API key from Google AI Studio</li>
+                <li>Videos must have captions or subtitles available</li>
+                <li>Processing may take 30-60 seconds for longer videos</li>
+                <li>The extension works best with educational content</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {};
+
+        function updateStatus(testId, status, message) {
+            const statusElement = document.getElementById(testId + '-status');
+            const testElement = document.getElementById(testId + '-test');
+            
+            statusElement.className = `status ${status}`;
+            statusElement.textContent = status === 'pass' ? '✓' : status === 'fail' ? '✗' : status === 'warning' ? '⚠' : '?';
+            
+            if (message) {
+                testElement.querySelector('div:last-child').innerHTML = message;
+            }
+            
+            testResults[testId] = { status, message, timestamp: new Date().toISOString() };
+        }
+
+        async function testExtensionInstalled() {
+            try {
+                // Try to detect if we're in a Chrome extension context
+                if (typeof chrome !== 'undefined' && chrome.runtime) {
+                    updateStatus('ext', 'warning', 'Running inside extension context - cannot test external installation');
+                    return;
+                }
+
+                // Check if extension is accessible (this will only work if this page is served from the extension)
+                updateStatus('ext', 'warning', 'Extension detection from external page not possible - check manually');
+            } catch (error) {
+                updateStatus('ext', 'fail', `Extension not detected: ${error.message}`);
+            }
+        }
+
+        async function testPermissions() {
+            try {
+                if (typeof chrome === 'undefined') {
+                    updateStatus('perm', 'warning', 'Cannot test permissions from external page');
+                    return;
+                }
+
+                // This would work if running inside the extension
+                updateStatus('perm', 'warning', 'Permission testing requires extension context');
+            } catch (error) {
+                updateStatus('perm', 'fail', `Permission test failed: ${error.message}`);
+            }
+        }
+
+        async function testStorage() {
+            try {
+                if (typeof chrome === 'undefined' || !chrome.storage) {
+                    updateStatus('storage', 'warning', 'Cannot test Chrome storage from external page');
+                    return;
+                }
+
+                updateStatus('storage', 'warning', 'Storage testing requires extension context');
+            } catch (error) {
+                updateStatus('storage', 'fail', `Storage test failed: ${error.message}`);
+            }
+        }
+
+        async function testApiConfiguration() {
+            try {
+                updateStatus('api', 'warning', 'API configuration test requires extension context - check in extension options');
+            } catch (error) {
+                updateStatus('api', 'fail', `API test failed: ${error.message}`);
+            }
+        }
+
+        async function runAllTests() {
+            updateStatus('ext', 'unknown', 'Testing...');
+            updateStatus('perm', 'unknown', 'Testing...');
+            updateStatus('storage', 'unknown', 'Testing...');
+            updateStatus('api', 'unknown', 'Testing...');
+
+            await testExtensionInstalled();
+            await testPermissions();
+            await testStorage();
+            await testApiConfiguration();
+
+            showTestSummary();
+        }
+
+        function showTestSummary() {
+            const results = Object.values(testResults);
+            const passed = results.filter(r => r.status === 'pass').length;
+            const warnings = results.filter(r => r.status === 'warning').length;
+            const failed = results.filter(r => r.status === 'fail').length;
+
+            const summary = document.createElement('div');
+            summary.className = 'results';
+            summary.innerHTML = `
+                <h3>🧪 Test Summary</h3>
+                <p><strong>Passed:</strong> ${passed} | <strong>Warnings:</strong> ${warnings} | <strong>Failed:</strong> ${failed}</p>
+                <p><em>Note: This is an external test page. For complete testing, load the extension in Chrome and test on actual YouTube videos.</em></p>
+            `;
+
+            const existingSummary = document.querySelector('.results');
+            if (existingSummary) {
+                existingSummary.replaceWith(summary);
+            } else {
+                document.querySelector('.test-section').appendChild(summary);
+            }
+        }
+
+        function openExtensionOptions() {
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                chrome.runtime.openOptionsPage();
+            } else {
+                alert('Please open Chrome, go to chrome://extensions/, find "YouTube Summarizer for Kids", and click "Options"');
+            }
+        }
+
+        function runDiagnostics() {
+            const diagnostics = {
+                userAgent: navigator.userAgent,
+                chromeDetected: typeof chrome !== 'undefined',
+                timestamp: new Date().toISOString(),
+                url: window.location.href,
+                testResults: testResults
+            };
+
+            const resultsDiv = document.getElementById('troubleshooting-results');
+            resultsDiv.innerHTML = `
+                <div class="results">
+                    <h3>🔍 Diagnostic Information</h3>
+                    <div class="code">${JSON.stringify(diagnostics, null, 2)}</div>
+                    <p><strong>Recommendations:</strong></p>
+                    <ul>
+                        <li>Ensure Chrome version 88 or later</li>
+                        <li>Check that Developer Mode is enabled in chrome://extensions/</li>
+                        <li>Verify the extension folder contains manifest.json</li>
+                        <li>Test with a valid Gemini API key</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        function exportLogs() {
+            const logData = {
+                timestamp: new Date().toISOString(),
+                testResults: testResults,
+                userAgent: navigator.userAgent,
+                url: window.location.href
+            };
+
+            const blob = new Blob([JSON.stringify(logData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'youtube-summarizer-test-results.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-run basic tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,566 @@
+/* Content script styles for YouTube Summarizer for Kids Chrome Extension */
+/* Styles for elements injected into YouTube pages */
+
+:root {
+  /* Kid-friendly color palette matching the extension theme */
+  --yt-summarizer-primary: #ff6b6b;
+  --yt-summarizer-secondary: #4ecdc4;
+  --yt-summarizer-accent: #ff9f43;
+  --yt-summarizer-success: #7ed321;
+  --yt-summarizer-warning: #f5a623;
+  --yt-summarizer-error: #d0021b;
+  
+  /* Background colors */
+  --yt-summarizer-bg-primary: #f9f9f9;
+  --yt-summarizer-bg-secondary: #ffffff;
+  --yt-summarizer-bg-accent: #ffe8d6;
+  --yt-summarizer-bg-light: #e8f4f8;
+  --yt-summarizer-bg-success: #e8f5e8;
+  --yt-summarizer-bg-error: #ffeaea;
+  
+  /* Text colors */
+  --yt-summarizer-text-primary: #333333;
+  --yt-summarizer-text-secondary: #666666;
+  --yt-summarizer-text-light: #999999;
+  --yt-summarizer-text-white: #ffffff;
+  
+  /* Borders and shadows */
+  --yt-summarizer-border-radius: 10px;
+  --yt-summarizer-border-radius-small: 6px;
+  --yt-summarizer-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --yt-summarizer-shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --yt-summarizer-shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.2);
+  
+  /* Typography */
+  --yt-summarizer-font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', sans-serif;
+  --yt-summarizer-font-size-small: 12px;
+  --yt-summarizer-font-size-base: 14px;
+  --yt-summarizer-font-size-medium: 16px;
+  --yt-summarizer-font-size-large: 18px;
+  --yt-summarizer-font-size-xlarge: 24px;
+}
+
+/* Summary Button */
+.yt-summarizer-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin: 8px;
+  background: linear-gradient(135deg, var(--yt-summarizer-primary), var(--yt-summarizer-accent));
+  color: var(--yt-summarizer-text-white);
+  border: none;
+  border-radius: var(--yt-summarizer-border-radius-small);
+  font-family: var(--yt-summarizer-font-family);
+  font-size: var(--yt-summarizer-font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--yt-summarizer-shadow-light);
+  z-index: 1000;
+  position: relative;
+}
+
+.yt-summarizer-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--yt-summarizer-shadow-medium);
+}
+
+.yt-summarizer-button:disabled {
+  opacity: 0.6;
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* Main Summary Panel */
+.yt-summarizer-panel {
+  font-family: var(--yt-summarizer-font-family);
+  background: var(--yt-summarizer-bg-secondary);
+  border: 2px solid var(--yt-summarizer-secondary);
+  border-radius: var(--yt-summarizer-border-radius);
+  margin: 20px 0;
+  box-shadow: var(--yt-summarizer-shadow-strong);
+  overflow: hidden;
+  z-index: 100;
+  position: relative;
+  animation: yt-summarizer-slideIn 0.5s ease;
+}
+
+.yt-summarizer-panel.error {
+  border-color: var(--yt-summarizer-error);
+  background: var(--yt-summarizer-bg-error);
+}
+
+/* Panel Header */
+.panel-header {
+  background: linear-gradient(135deg, var(--yt-summarizer-secondary), var(--yt-summarizer-primary));
+  color: var(--yt-summarizer-text-white);
+  padding: 20px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header.error {
+  background: linear-gradient(135deg, var(--yt-summarizer-error), #c62828);
+}
+
+.panel-header h2,
+.panel-header h3 {
+  margin: 0;
+  font-size: var(--yt-summarizer-font-size-large);
+  font-weight: 700;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--yt-summarizer-text-white);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Panel Content */
+.panel-content {
+  padding: 24px;
+  line-height: 1.6;
+}
+
+/* Video Info */
+.video-info {
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--yt-summarizer-bg-light);
+  border-radius: var(--yt-summarizer-border-radius-small);
+}
+
+.video-info .thumbnail {
+  max-width: 200px;
+  border-radius: var(--yt-summarizer-border-radius-small);
+  box-shadow: var(--yt-summarizer-shadow-light);
+  margin-bottom: 12px;
+}
+
+.video-info h3 {
+  color: var(--yt-summarizer-text-primary);
+  margin: 0;
+  font-size: var(--yt-summarizer-font-size-medium);
+}
+
+/* Summary Section */
+.summary {
+  background: var(--yt-summarizer-bg-accent);
+  padding: 20px;
+  border-radius: var(--yt-summarizer-border-radius);
+  margin-bottom: 24px;
+  border-left: 4px solid var(--yt-summarizer-accent);
+}
+
+.summary h3 {
+  color: var(--yt-summarizer-accent);
+  margin-bottom: 12px;
+  font-size: var(--yt-summarizer-font-size-large);
+}
+
+.summary p {
+  color: var(--yt-summarizer-text-primary);
+  margin: 0;
+  font-size: var(--yt-summarizer-font-size-medium);
+  line-height: 1.7;
+}
+
+/* Connections Section */
+.connections {
+  background: var(--yt-summarizer-bg-light);
+  padding: 20px;
+  border-radius: var(--yt-summarizer-border-radius);
+  margin-bottom: 24px;
+  border-left: 4px solid var(--yt-summarizer-secondary);
+}
+
+.connections h3 {
+  color: var(--yt-summarizer-secondary);
+  margin-bottom: 12px;
+  font-size: var(--yt-summarizer-font-size-large);
+}
+
+.connections ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.connections li {
+  color: var(--yt-summarizer-text-primary);
+  margin-bottom: 8px;
+  font-size: var(--yt-summarizer-font-size-base);
+}
+
+/* Topics Section */
+.topics h3 {
+  color: var(--yt-summarizer-primary);
+  margin-bottom: 20px;
+  font-size: var(--yt-summarizer-font-size-large);
+  text-align: center;
+}
+
+/* Individual Topic */
+.topic {
+  background: var(--yt-summarizer-bg-secondary);
+  border: 2px solid #e0e0e0;
+  border-radius: var(--yt-summarizer-border-radius);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.topic:hover {
+  border-color: var(--yt-summarizer-secondary);
+  box-shadow: var(--yt-summarizer-shadow-medium);
+}
+
+.topic h3 {
+  background: linear-gradient(135deg, var(--yt-summarizer-secondary), var(--yt-summarizer-primary));
+  color: var(--yt-summarizer-text-white);
+  padding: 16px 20px;
+  margin: 0;
+  font-size: var(--yt-summarizer-font-size-medium);
+  font-weight: 600;
+}
+
+.topic-summary {
+  padding: 16px 20px;
+  background: var(--yt-summarizer-bg-accent);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.topic-summary strong {
+  color: var(--yt-summarizer-accent);
+  font-weight: 700;
+}
+
+.explanation {
+  padding: 16px 20px;
+  background: var(--yt-summarizer-bg-light);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.explanation strong {
+  color: var(--yt-summarizer-secondary);
+  font-weight: 700;
+}
+
+/* Q&A Section */
+.qa-section {
+  padding: 20px;
+}
+
+.qa-section h4 {
+  color: var(--yt-summarizer-primary);
+  margin-bottom: 16px;
+  font-size: var(--yt-summarizer-font-size-medium);
+}
+
+.qa {
+  background: var(--yt-summarizer-bg-secondary);
+  border: 1px solid #e0e0e0;
+  border-radius: var(--yt-summarizer-border-radius-small);
+  margin-bottom: 12px;
+  padding: 16px;
+  box-shadow: var(--yt-summarizer-shadow-light);
+}
+
+.qa:last-child {
+  margin-bottom: 0;
+}
+
+.question {
+  font-weight: 700;
+  color: var(--yt-summarizer-text-secondary);
+  margin-bottom: 8px;
+  font-size: var(--yt-summarizer-font-size-base);
+}
+
+.answer {
+  color: var(--yt-summarizer-text-primary);
+  font-size: var(--yt-summarizer-font-size-base);
+  line-height: 1.6;
+}
+
+/* Error Help Section */
+.error-help {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--yt-summarizer-border-radius-small);
+}
+
+.error-help h4,
+.error-help p {
+  color: var(--yt-summarizer-text-white);
+  margin-bottom: 8px;
+}
+
+.error-help ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.error-help li {
+  color: var(--yt-summarizer-text-white);
+  margin-bottom: 4px;
+  opacity: 0.9;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 16px;
+  background: var(--yt-summarizer-bg-light);
+  color: var(--yt-summarizer-text-secondary);
+  font-style: italic;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Animations */
+@keyframes yt-summarizer-slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes yt-summarizer-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.topic {
+  animation: yt-summarizer-fadeIn 0.5s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .yt-summarizer-panel {
+    margin: 16px 0;
+    border-radius: var(--yt-summarizer-border-radius-small);
+  }
+  
+  .panel-content {
+    padding: 16px;
+  }
+  
+  .panel-header {
+    padding: 16px;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+  
+  .close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+  
+  .video-info .thumbnail {
+    max-width: 150px;
+  }
+  
+  .summary,
+  .connections,
+  .topic-summary,
+  .explanation,
+  .qa-section {
+    padding: 12px 16px;
+  }
+  
+  .topic h3 {
+    padding: 12px 16px;
+    font-size: var(--yt-summarizer-font-size-base);
+  }
+}
+
+/* Dark mode compatibility */
+@media (prefers-color-scheme: dark) {
+  .yt-summarizer-panel {
+    background: #1a1a1a;
+    color: #e0e0e0;
+  }
+  
+  .summary,
+  .connections,
+  .topic-summary,
+  .explanation {
+    background: #2a2a2a;
+  }
+  
+  .topic {
+    background: #1e1e1e;
+    border-color: #444;
+  }
+  
+  .qa {
+    background: #2a2a2a;
+    border-color: #444;
+  }
+  
+  .video-info {
+    background: #2a2a2a;
+  }
+  
+  .footer {
+    background: #2a2a2a;
+    border-color: #444;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .yt-summarizer-panel {
+    border-width: 3px;
+  }
+  
+  .topic {
+    border-width: 2px;
+  }
+  
+  .qa {
+    border-width: 2px;
+  }
+  
+  .yt-summarizer-button {
+    border: 2px solid var(--yt-summarizer-text-white);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .yt-summarizer-panel,
+  .topic,
+  .yt-summarizer-button {
+    animation: none;
+    transition: none;
+  }
+  
+  .yt-summarizer-button:hover,
+  .topic:hover {
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .yt-summarizer-button {
+    display: none;
+  }
+  
+  .close-btn {
+    display: none;
+  }
+  
+  .yt-summarizer-panel {
+    box-shadow: none;
+    border: 2px solid #000;
+    page-break-inside: avoid;
+  }
+  
+  .topic {
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+}
+
+/* Additional fixes for better integration and visibility */
+#yt-summarizer-btn {
+  min-width: 180px !important;
+  text-align: center !important;
+  z-index: 9999 !important;
+}
+
+/* Ensure summary panel is always visible */
+.yt-summarizer-panel {
+  position: relative !important;
+  z-index: 100 !important;
+  clear: both !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 20px 0 !important;
+}
+
+/* Force visibility of summary content */
+.yt-summarizer-panel * {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Better positioning for floating button fallback */
+.yt-summarizer-button[style*="position: fixed"] {
+  top: 120px !important;
+  right: 20px !important;
+  z-index: 10000 !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+}
+
+/* Scroll to panel animation */
+.yt-summarizer-panel.scroll-target {
+  animation: yt-summarizer-highlight 2s ease;
+}
+
+@keyframes yt-summarizer-highlight {
+  0% { background-color: rgba(255, 107, 107, 0.1); }
+  50% { background-color: rgba(255, 107, 107, 0.2); }
+  100% { background-color: transparent; }
+}
+
+/* Slide in animation for floating elements */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Ensure panel visibility and better positioning */
+.yt-summarizer-panel {
+  box-sizing: border-box !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Better button visibility */
+#yt-summarizer-btn {
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
