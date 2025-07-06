@@ -251,6 +251,7 @@
 .topic-summary strong {
   color: var(--yt-summarizer-accent);
   font-weight: 700;
+  font-size: var(--yt-summarizer-font-size-medium);
 }
 
 .explanation {
@@ -262,6 +263,87 @@
 .explanation strong {
   color: var(--yt-summarizer-secondary);
   font-weight: 700;
+  font-size: var(--yt-summarizer-font-size-medium);
+}
+
+/* Collapsible Learn More Section */
+.explanation-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.explanation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 0;
+  transition: all 0.2s ease;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
+  position: relative;
+  margin-top: 16px;
+}
+
+.explanation-header strong, 
+.qa-section-header h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--yt-summarizer-font-size-medium);
+}
+
+.explanation-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 6px;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px transparent;
+  transition: box-shadow 0.2s ease;
+}
+
+.explanation-header:hover::after {
+  box-shadow: 0 0 0 2px var(--yt-summarizer-secondary);
+}
+
+/* Handle transition between collapsed and expanded states */
+.explanation-section:not(.collapsed) .explanation-header,
+.qa-section:not(.collapsed) .qa-section-header {
+  margin-bottom: 16px;
+  background-color: rgba(78, 205, 196, 0.05);
+}
+
+.explanation-content,
+.qa-content {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.5s ease, margin 0.3s ease, padding 0.3s ease;
+  opacity: 1;
+  margin-top: 16px;
+  padding: 0 16px 16px 16px;
+}
+
+.explanation-section.collapsed .explanation-content,
+.qa-section.collapsed .qa-content {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.explanation-section.collapsed .toggle-icon,
+.qa-section.collapsed .toggle-icon {
+  transform: rotate(-90deg);
 }
 
 /* Q&A Section */
@@ -269,36 +351,91 @@
   padding: 20px;
 }
 
-.qa-section h4 {
-  color: var(--yt-summarizer-primary);
-  margin-bottom: 16px;
-  font-size: var(--yt-summarizer-font-size-medium);
-}
-
-.qa {
-  background: var(--yt-summarizer-bg-secondary);
-  border: 1px solid #e0e0e0;
-  border-radius: var(--yt-summarizer-border-radius-small);
-  margin-bottom: 12px;
-  padding: 16px;
-  box-shadow: var(--yt-summarizer-shadow-light);
-}
-
-.qa:last-child {
+.qa-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
   margin-bottom: 0;
+  transition: all 0.2s ease;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
+  position: relative;
 }
 
-.question {
-  font-weight: 700;
-  color: var(--yt-summarizer-text-secondary);
-  margin-bottom: 8px;
-  font-size: var(--yt-summarizer-font-size-base);
+.qa-section-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 6px;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px transparent;
+  transition: box-shadow 0.2s ease;
 }
 
-.answer {
-  color: var(--yt-summarizer-text-primary);
-  font-size: var(--yt-summarizer-font-size-base);
-  line-height: 1.6;
+.qa-section-header:hover::after {
+  box-shadow: 0 0 0 2px var(--yt-summarizer-secondary);
+}
+
+.qa-section-header h4 {
+  color: var(--yt-summarizer-primary);
+  margin: 0;
+  font-size: var(--yt-summarizer-font-size-medium);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-icon {
+  font-size: 16px;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+  color: var(--yt-summarizer-secondary);
+  display: inline-block;
+  padding: 4px;
+  border-radius: 50%;
+  background-color: rgba(78, 205, 196, 0.1);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qa-section-header:hover .toggle-icon,
+.explanation-header:hover .toggle-icon {
+  background-color: rgba(78, 205, 196, 0.3);
+}
+
+.qa-section.collapsed .toggle-icon {
+  transform: rotate(-90deg);
+}
+
+.qa-content {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.5s ease, margin 0.3s ease;
+  opacity: 1;
+  margin-top: 16px;
+}
+
+.qa-section.collapsed .qa-content {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.qa-section.collapsed .toggle-icon {
+  transform: rotate(-90deg);
 }
 
 /* Error Help Section */
@@ -393,7 +530,8 @@
   .connections,
   .topic-summary,
   .explanation,
-  .qa-section {
+  .qa-section,
+  .explanation-section {
     padding: 12px 16px;
   }
   
@@ -401,40 +539,182 @@
     padding: 12px 16px;
     font-size: var(--yt-summarizer-font-size-base);
   }
+  
+  .qa-section,
+  .explanation-section {
+    padding: 12px;
+  }
+  
+  .qa-section-header,
+  .explanation-header {
+    padding: 10px;
+  }
+  
+  .qa-content,
+  .explanation-content {
+    margin-top: 12px;
+  }
+  
+  .qa {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
 }
 
 /* Dark mode compatibility */
 @media (prefers-color-scheme: dark) {
+  /* Updated panel colors for better visibility */
   .yt-summarizer-panel {
-    background: #1a1a1a;
-    color: #e0e0e0;
+    background: #212121;
+    color: #f5f5f5;
+    border-color: var(--yt-summarizer-secondary);
   }
   
-  .summary,
-  .connections,
-  .topic-summary,
+  /* Section backgrounds with better contrast */
+  .summary {
+    background: #303030;
+    border-color: var(--yt-summarizer-accent);
+  }
+  
+  .connections {
+    background: #303030;
+    border-color: var(--yt-summarizer-secondary);
+  }
+  
+  .topic-summary {
+    background: #303030;
+    border-color: var(--yt-summarizer-accent);
+  }
+  
   .explanation {
-    background: #2a2a2a;
+    background: #282828;
+    border-color: var(--yt-summarizer-secondary);
   }
   
+  /* Topic and QA elements */
   .topic {
-    background: #1e1e1e;
-    border-color: #444;
+    background: #212121;
+    border-color: #555;
   }
   
   .qa {
-    background: #2a2a2a;
-    border-color: #444;
+    background: #282828;
+    border-color: #555;
   }
   
   .video-info {
-    background: #2a2a2a;
+    background: #303030;
   }
   
   .footer {
-    background: #2a2a2a;
-    border-color: #444;
+    background: #282828;
+    border-color: #555;
   }
+  
+  /* Text color adjustments for better readability */
+  .topic-summary strong,
+  .explanation strong,
+  .qa-section h4,
+  .topics h3,
+  .summary h3,
+  .connections h3 {
+    color: #7cdcde; /* Lighter teal for better visibility */
+  }
+  
+  .video-info h3,
+  .summary p,
+  .connections li,
+  .question,
+  .answer {
+    color: #f5f5f5;
+  }
+  
+  /* Better button visibility in dark mode */
+  .yt-summarizer-button {
+    background: linear-gradient(135deg, #ff6b6b, #ff9f43);
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* YouTube-specific dark theme detection */
+html[dark],
+html[system-theme="dark"] {
+  --yt-summarizer-bg-primary: #212121;
+  --yt-summarizer-bg-secondary: #181818;
+  --yt-summarizer-bg-accent: #303030;
+  --yt-summarizer-bg-light: #282828;
+  --yt-summarizer-text-primary: #f5f5f5;
+  --yt-summarizer-text-secondary: #aaaaaa;
+  --yt-summarizer-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --yt-summarizer-shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --yt-summarizer-shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+html[dark] .yt-summarizer-panel,
+html[system-theme="dark"] .yt-summarizer-panel {
+  background: #212121;
+  color: #f5f5f5;
+  border-color: var(--yt-summarizer-secondary);
+}
+
+html[dark] .summary,
+html[dark] .connections,
+html[dark] .topic-summary,
+html[dark] .explanation,
+html[system-theme="dark"] .summary,
+html[system-theme="dark"] .connections,
+html[system-theme="dark"] .topic-summary,
+html[system-theme="dark"] .explanation {
+  background: #303030;
+  border-color: #555;
+}
+
+html[dark] .topic,
+html[system-theme="dark"] .topic {
+  background: #212121;
+  border-color: #555;
+}
+
+html[dark] .qa,
+html[system-theme="dark"] .qa {
+  background: #282828;
+  border-color: #555;
+}
+
+html[dark] .qa-section-header,
+html[system-theme="dark"] .qa-section-header,
+html[dark] .explanation-header,
+html[system-theme="dark"] .explanation-header {
+  border-color: #555;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+html[dark] .toggle-icon,
+html[system-theme="dark"] .toggle-icon {
+  background-color: rgba(78, 205, 196, 0.2);
+}
+
+html[dark] .qa-section-header:hover .toggle-icon,
+html[dark] .explanation-header:hover .toggle-icon,
+html[system-theme="dark"] .qa-section-header:hover .toggle-icon,
+html[system-theme="dark"] .explanation-header:hover .toggle-icon {
+  background-color: rgba(78, 205, 196, 0.4);
+}
+
+html[dark] .topic-summary strong,
+html[dark] .explanation strong,
+html[dark] .qa-section h4,
+html[dark] .topics h3,
+html[dark] .summary h3,
+html[dark] .connections h3,
+html[system-theme="dark"] .topic-summary strong,
+html[system-theme="dark"] .explanation strong,
+html[system-theme="dark"] .qa-section h4,
+html[system-theme="dark"] .topics h3,
+html[system-theme="dark"] .summary h3,
+html[system-theme="dark"] .connections h3 {
+  color: #7cdcde; /* Lighter teal for better visibility */
 }
 
 /* High contrast mode support */
@@ -563,4 +843,78 @@
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
+}
+
+.section-title {
+  font-size: var(--yt-summarizer-font-size-large) !important;
+  color: var(--yt-summarizer-primary);
+  font-weight: 700;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.topic-summary strong.section-title {
+  color: var(--yt-summarizer-accent);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.explanation-header strong.section-title {
+  color: var(--yt-summarizer-secondary);
+  font-size: var(--yt-summarizer-font-size-large) !important;
+}
+
+/* Improved collapsible sections */
+.explanation-section, .qa-section {
+  position: relative;
+  margin: 16px 0;
+  border-radius: var(--yt-summarizer-border-radius-small);
+  overflow: hidden;
+}
+
+.explanation-section.collapsed .explanation-content,
+.qa-section.collapsed .qa-content {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.explanation-section.collapsed .toggle-icon,
+.qa-section.collapsed .toggle-icon {
+  transform: rotate(-90deg);
+}
+
+/* Dark mode compatibility for section titles */
+@media (prefers-color-scheme: dark) {
+  .section-title {
+    color: #7cdcde;
+  }
+  
+  .topic-summary strong.section-title {
+    color: var(--yt-summarizer-accent);
+  }
+  
+  .explanation-header strong.section-title {
+    color: #7cdcde;
+  }
+}
+
+/* YouTube-specific dark theme for section titles */
+html[dark] .section-title,
+html[system-theme="dark"] .section-title {
+  color: #7cdcde;
+}
+
+html[dark] .topic-summary strong.section-title,
+html[system-theme="dark"] .topic-summary strong.section-title {
+  color: var(--yt-summarizer-accent);
+}
+
+html[dark] .explanation-header strong.section-title,
+html[system-theme="dark"] .explanation-header strong.section-title {
+  color: #7cdcde;
 }

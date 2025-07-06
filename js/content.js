@@ -655,6 +655,9 @@ class YouTubeContentScript {
     panel.innerHTML = this.generateSummaryHTML(data);
     
     this.insertSummaryPanel(panel);
+    
+    // Ensure sections are collapsed by default
+    setTimeout(() => this.collapseByDefault(), 300);
   }
 
   generateSummaryHTML(data) {
@@ -676,19 +679,32 @@ class YouTubeContentScript {
       <div class="topic">
         <h3>📚 ${topic.name}</h3>
         <div class="topic-summary">
-          <strong>Quick Summary:</strong> ${topic.summary}
+          <strong class="section-title">Quick Summary:</strong> ${topic.summary}
         </div>
-        <div class="explanation">
-          <strong>Learn More:</strong> ${topic.explanation}
+        <div class="explanation-section">
+          <div class="explanation-header">
+            <strong class="section-title">📖 Learn More:</strong>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="explanation-content">
+            <div class="explanation">
+              ${topic.explanation}
+            </div>
+          </div>
         </div>
         <div class="qa-section">
-          <h4>❓ Questions & Answers:</h4>
-          ${topic.qaPairs.map(qa => `
-            <div class="qa">
-              <div class="question">Q: ${qa.question}</div>
-              <div class="answer">A: ${qa.answer}</div>
-            </div>
-          `).join('')}
+          <div class="qa-section-header">
+            <h4>❓ Questions & Answers:</h4>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="qa-content">
+            ${topic.qaPairs.map(qa => `
+              <div class="qa">
+                <div class="question">Q: ${qa.question}</div>
+                <div class="answer">A: ${qa.answer}</div>
+              </div>
+            `).join('')}
+          </div>
         </div>
       </div>
     `).join('');
@@ -738,10 +754,17 @@ class YouTubeContentScript {
       for (const selector of secondaryTargets) {
         const target = document.querySelector(selector);
         if (target) {
-          target.insertBefore(panel, target.firstChild);
+          // Check if firstChild exists before using insertBefore
+          if (target.firstChild) {
+            target.insertBefore(panel, target.firstChild);
+          } else {
+            target.appendChild(panel);
+          }
           this.summaryPanel = panel;
           this.log('Panel inserted in secondary area:', selector);
           this.scrollToPanel(panel);
+          // Initialize collapsible sections
+          this.initCollapsibleSections(panel);
           return;
         }
       }
@@ -760,6 +783,8 @@ class YouTubeContentScript {
           this.summaryPanel = panel;
           this.log('Panel inserted after primary:', selector);
           this.scrollToPanel(panel);
+          // Initialize collapsible sections
+          this.initCollapsibleSections(panel);
           return;
         }
       }
@@ -790,6 +815,8 @@ class YouTubeContentScript {
           this.summaryPanel = panel;
           this.log('Panel inserted in main area:', selector);
           this.scrollToPanel(panel);
+          // Initialize collapsible sections
+          this.initCollapsibleSections(panel);
           return;
         }
       }
@@ -810,6 +837,83 @@ class YouTubeContentScript {
       `;
       document.body.appendChild(panel);
       this.summaryPanel = panel;
+      // Initialize collapsible sections
+      this.initCollapsibleSections(panel);
+    }
+  }
+
+  initCollapsibleSections(panel) {
+    try {
+      // Add click handlers to all qa-section-header elements
+      const qaHeaders = panel.querySelectorAll('.qa-section-header');
+      this.log(`Found ${qaHeaders.length} Q&A section headers`);
+      
+      qaHeaders.forEach((header, index) => {
+        // Remove existing listeners to avoid duplicates
+        const newHeader = header.cloneNode(true);
+        header.parentNode.replaceChild(newHeader, header);
+        
+        newHeader.addEventListener('click', (e) => {
+          const section = newHeader.closest('.qa-section');
+          section.classList.toggle('collapsed');
+          this.log(`Toggled Q&A section ${index + 1} - collapsed: ${section.classList.contains('collapsed')}`);
+          e.stopPropagation(); // Prevent event bubbling
+        });
+      });
+      
+      // Add click handlers to all explanation-header elements
+      const explanationHeaders = panel.querySelectorAll('.explanation-header');
+      this.log(`Found ${explanationHeaders.length} Learn More section headers`);
+      
+      explanationHeaders.forEach((header, index) => {
+        // Remove existing listeners to avoid duplicates
+        const newHeader = header.cloneNode(true);
+        header.parentNode.replaceChild(newHeader, header);
+        
+        newHeader.addEventListener('click', (e) => {
+          const section = newHeader.closest('.explanation-section');
+          section.classList.toggle('collapsed');
+          this.log(`Toggled Learn More section ${index + 1} - collapsed: ${section.classList.contains('collapsed')}`);
+          e.stopPropagation(); // Prevent event bubbling
+        });
+      });
+      
+      this.log('Initialized all collapsible sections');
+      
+      // Collapse sections by default
+      this.collapseByDefault();
+    } catch (error) {
+      this.log('Error initializing collapsible sections:', error.message);
+    }
+  }
+
+  collapseByDefault() {
+    try {
+      if (!this.summaryPanel) {
+        this.log('Cannot collapse sections - summary panel not found');
+        return;
+      }
+      
+      // Give a short delay to ensure DOM is ready
+      setTimeout(() => {
+        // Collapse all QA sections by default
+        const qaSections = this.summaryPanel.querySelectorAll('.qa-section');
+        qaSections.forEach(section => {
+          section.classList.add('collapsed');
+          this.log('Collapsed Q&A section');
+        });
+        
+        // Collapse all explanation sections by default
+        const explanationSections = this.summaryPanel.querySelectorAll('.explanation-section');
+        explanationSections.forEach(section => {
+          section.classList.add('collapsed');
+          this.log('Collapsed Learn More section');
+        });
+        
+        this.log('Collapsed all sections by default');
+      }, 200);
+    } catch (error) {
+      this.log('Error collapsing sections by default:', error.message);
     }
   }
 
