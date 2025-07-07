@@ -72,6 +72,53 @@
   cursor: not-allowed;
 }
 
+/* View Detailed Summary Button */
+.view-detailed-container {
+  text-align: center;
+  margin: 20px 0;
+  padding: 15px;
+  background: var(--yt-summarizer-bg-light);
+  border-radius: var(--yt-summarizer-border-radius);
+}
+
+.view-detailed-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--yt-summarizer-secondary), var(--yt-summarizer-success));
+  color: var(--yt-summarizer-text-white);
+  border: none;
+  border-radius: var(--yt-summarizer-border-radius-small);
+  font-family: var(--yt-summarizer-font-family);
+  font-size: var(--yt-summarizer-font-size-medium);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--yt-summarizer-shadow-light);
+}
+
+.view-detailed-button:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--yt-summarizer-shadow-medium);
+}
+
+.view-detailed-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-icon {
+  font-size: 1.2em;
+}
+
+.detailed-info {
+  margin-top: 10px;
+  font-size: var(--yt-summarizer-font-size-small);
+  color: var(--yt-summarizer-text-secondary);
+}
+
 /* Main Summary Panel */
 .yt-summarizer-panel {
   font-family: var(--yt-summarizer-font-family);
@@ -496,6 +543,34 @@
 
 .topic {
   animation: yt-summarizer-fadeIn 0.5s ease;
+}
+
+/* Highlight effect for newly created panel */
+@keyframes highlight-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(126, 211, 33, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(126, 211, 33, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(126, 211, 33, 0); }
+}
+
+.highlight-panel {
+  animation: highlight-pulse 1.5s ease-in-out 2;
+  border: 2px solid var(--yt-summarizer-success);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: var(--yt-summarizer-text-white);
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Responsive Design */

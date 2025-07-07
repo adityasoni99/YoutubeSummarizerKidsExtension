@@ -121,7 +121,7 @@ class YouTubeSummarizerFlow {
 
   // Node 3: Generate Topics using Gemini API
   async generateTopics() {
-    this.log('Generating topics...');
+    this.log('Generating topics and initial summary...');
     
     // Truncate transcript if too long to avoid API limits
     const maxLength = 8000;
@@ -129,7 +129,7 @@ class YouTubeSummarizerFlow {
       ? this.shared.transcript.substring(0, maxLength) + "..."
       : this.shared.transcript;
 
-    const prompt = `You are analyzing a YouTube video to identify the main topics discussed.
+    const prompt = `You are analyzing a YouTube video to identify the main topics discussed and creating an initial summary.
 
 VIDEO TITLE: ${this.shared.videoInfo.title}
 
@@ -139,7 +139,8 @@ ${transcript}
 TASK:
 1. Identify 3-5 main topics or themes from this video content.
 2. For each topic, create a brief description.
-3. Format your response as JSON following this structure:
+3. Create a kid-friendly initial summary of the overall video (150-200 words).
+4. Format your response as JSON following this structure:
 
 {
   "topics": [
@@ -148,12 +149,9 @@ TASK:
       "name": "First Topic Name",
       "content": "Brief description of what this topic covers"
     },
-    {
-      "id": 2,
-      "name": "Second Topic Name", 
-      "content": "Brief description of what this topic covers"
-    }
-  ]
+    // more topics...
+  ],
+  "initialSummary": "A clear, simple summary of the video suitable for children."
 }
 
 Only include valid JSON in your response.`;
@@ -181,7 +179,8 @@ Only include valid JSON in your response.`;
       }
       
       this.shared.topics = topics.topics;
-      this.log('Topics generated:', this.shared.topics.length);
+      this.shared.initialSummary = topics.initialSummary || '';
+      this.log('Topics and initial summary generated:', this.shared.topics.length);
       return { success: true, count: this.shared.topics.length };
     } catch (error) {
       this.log('Topic generation failed, using fallback:', error.message);
@@ -191,6 +190,7 @@ Only include valid JSON in your response.`;
         name: "Main Content",
         content: `This video "${this.shared.videoInfo.title}" discusses various educational topics that can be explained in a kid-friendly way.`
       }];
+      this.shared.initialSummary = `This video "${this.shared.videoInfo.title}" contains educational content that can be fun to learn about!`;
       return { success: true, count: 1, fallback: true };
     }
   }
@@ -423,6 +423,86 @@ Your summary:`;
     }
   }
 
+  // Node 6.1: Create Initial Summary (new step for two-phase approach)
+  async createInitialSummary() {
+    this.log('Creating initial summary...');
+    
+    if (!this.shared.topics || this.shared.topics.length === 0) {
+      this.shared.initialSummary = `This video "${this.shared.videoInfo.title}" contains educational content that can be fun to learn about!`;
+      return { success: true, fallback: true };
+    }
+
+    const topicHighlights = this.shared.topics.map(topic => 
+      `- ${topic.name}`
+    ).join('\n');
+    
+    const prompt = `You are creating an initial summary of a YouTube video for children.
+This summary should highlight the main topics without going into detail.
+
+VIDEO TITLE: ${this.shared.videoInfo.title}
+
+MAIN TOPICS:
+${topicHighlights}
+
+TASK:
+Create a very simple, engaging initial summary of this video that children would understand.
+Use simple words and a friendly tone.
+Keep it to 2-3 sentences.
+
+Your summary:`;
+
+    try {
+      const summary = await this.callGemini(prompt);
+      this.shared.initialSummary = summary.trim();
+      return { success: true };
+    } catch (error) {
+      this.log('Initial summary creation failed:', error.message);
+      // Fallback initial summary
+      this.shared.initialSummary = `This video "${this.shared.videoInfo.title}" covers various interesting topics!`;
+      return { success: true, fallback: true };
+    }
+  }
+
+  // Node 7: Create Detailed Summary
+  async createDetailedSummary() {
+    this.log('Creating detailed summary...');
+
+    // Get settings for target age
+    const { targetAge } = await chrome.storage.sync.get({ targetAge: '5-8' });
+    
+    const prompt = `You are creating a detailed summary of a YouTube video for young children (age range: ${targetAge}).
+
+VIDEO TITLE: ${this.shared.videoInfo.title}
+
+PROCESSED TOPICS:
+${JSON.stringify(this.shared.processedTopics, null, 2)}
+
+TOPIC CONNECTIONS:
+${JSON.stringify(this.shared.topicConnections, null, 2)}
+
+TASK:
+Create a thorough but accessible detailed summary that:
+1. Uses simple, engaging language suitable for children aged ${targetAge}
+2. Captures the main points and how they connect
+3. Is approximately 250-300 words
+4. Doesn't include complex terminology without explanation
+5. Uses a friendly, positive tone
+
+SUMMARY:`;
+    
+    try {
+      const response = await this.callGemini(prompt);
+      this.shared.detailedSummary = response.trim();
+      this.log('Detailed summary created, length:', this.shared.detailedSummary.length);
+      return { success: true };
+    } catch (error) {
+      this.log('Failed to create detailed summary, using fallback:', error.message);
+      // Create a fallback summary
+      this.shared.detailedSummary = `This video called "${this.shared.videoInfo.title}" has some interesting information about ${this.shared.processedTopics.map(t => t.name).join(', ')}. Each topic is explained in a way that's easy to understand. You can explore each topic section to learn more!`;
+      return { success: true, fallback: true };
+    }
+  }
+
   // Utility function to call Gemini API
   async callGemini(prompt) {
     this.log('Calling Gemini API...');
@@ -465,9 +545,9 @@ Your summary:`;
   }
 
   // Main flow execution
-  async run(url) {
+  async run(url, phase = 'initial') {
     try {
-      this.log('Starting YouTube summarizer flow for:', url);
+      this.log(`Starting YouTube summarizer flow for: ${url} (Phase: ${phase})`);
       
       await this.initialize();
       
@@ -480,30 +560,48 @@ Your summary:`;
       // Step 2: Get transcript
       await this.getTranscript();
 
-      // Step 3: Generate topics
+      // Step 3: Generate topics and initial summary
       await this.generateTopics();
 
-      // Step 4: Process topics (Map phase)
-      await this.processTopics();
+      if (phase === 'initial') {
+        // Initial phase: Just return topics and initial summary
+        this.log('Initial phase completed successfully');
+        return {
+          success: true,
+          phase: 'initial',
+          data: {
+            videoInfo: this.shared.videoInfo,
+            summary: this.shared.initialSummary,
+            topics: this.shared.topics,
+            processingState: 'initial'
+          }
+        };
+      } else if (phase === 'detailed') {
+        // Detailed phase: Process topics in depth
+        
+        // Step 4: Process topics (Map phase)
+        await this.processTopics();
 
-      // Step 5: Combine topics (Reduce phase)
-      await this.combineTopics();
+        // Step 5: Combine topics (Reduce phase)
+        await this.combineTopics();
 
-      // Step 6: Create summary
-      await this.createSummary();
+        // Step 6: Create detailed summary
+        await this.createDetailedSummary();
 
-      this.log('Flow completed successfully');
-
-      return {
-        success: true,
-        data: {
-          videoInfo: this.shared.videoInfo,
-          summary: this.shared.summary,
-          processedTopics: this.shared.processedTopics,
-          topicConnections: this.shared.topicConnections,
-          topicRanking: this.shared.topicRanking
-        }
-      };
+        this.log('Detailed phase completed successfully');
+        return {
+          success: true,
+          phase: 'detailed',
+          data: {
+            videoInfo: this.shared.videoInfo,
+            summary: this.shared.detailedSummary,
+            processedTopics: this.shared.processedTopics,
+            topicConnections: this.shared.topicConnections,
+            topicRanking: this.shared.topicRanking,
+            processingState: 'completed'
+          }
+        };
+      }
     } catch (error) {
       this.log('Flow execution failed:', error.message);
       return {
@@ -518,8 +616,9 @@ Your summary:`;
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'summarizeVideo') {
     const flow = new YouTubeSummarizerFlow();
+    const phase = request.phase || 'initial';
     
-    flow.run(request.url)
+    flow.run(request.url, phase)
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ 
         success: false, 
