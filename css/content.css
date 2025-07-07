@@ -265,6 +265,28 @@
   text-align: center;
 }
 
+/* Initial Topics display */
+.topic-initial {
+  background: var(--yt-summarizer-bg-light);
+  border-radius: var(--yt-summarizer-border-radius-small);
+  padding: 15px;
+  margin-bottom: 15px;
+  border-left: 4px solid var(--yt-summarizer-accent);
+}
+
+.topic-initial h3 {
+  margin-top: 0;
+  color: var(--yt-summarizer-text-primary);
+  font-size: var(--yt-summarizer-font-size-medium);
+  margin-bottom: 10px;
+}
+
+.topic-content {
+  color: var(--yt-summarizer-text-primary);
+  line-height: 1.7;
+  font-size: var(--yt-summarizer-font-size-medium);
+}
+
 /* Individual Topic */
 .topic {
   background: var(--yt-summarizer-bg-secondary);
@@ -817,6 +839,39 @@ html[system-theme="dark"] .topics h3,
 html[system-theme="dark"] .summary h3,
 html[system-theme="dark"] .connections h3 {
   color: #7cdcde; /* Lighter teal for better visibility */
+}
+
+/* Dark mode compatibility for initial topics */
+@media (prefers-color-scheme: dark) {
+  .topic-initial {
+    background: #303030;
+    border-color: var(--yt-summarizer-accent);
+  }
+  
+  .topic-initial h3 {
+    color: #f5f5f5;
+  }
+  
+  .topic-content {
+    color: #f5f5f5;
+  }
+}
+
+/* YouTube-specific dark theme for initial topics */
+html[dark] .topic-initial,
+html[system-theme="dark"] .topic-initial {
+  background: #303030;
+  border-color: var(--yt-summarizer-accent);
+}
+
+html[dark] .topic-initial h3,
+html[system-theme="dark"] .topic-initial h3 {
+  color: #f5f5f5;
+}
+
+html[dark] .topic-content,
+html[system-theme="dark"] .topic-content {
+  color: #f5f5f5;
 }
 
 /* High contrast mode support */
