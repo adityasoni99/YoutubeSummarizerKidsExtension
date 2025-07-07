@@ -298,19 +298,19 @@
 .topic-summary strong {
   color: var(--yt-summarizer-accent);
   font-weight: 700;
-  font-size: var(--yt-summarizer-font-size-medium);
 }
 
 .explanation {
   padding: 16px 20px;
   background: var(--yt-summarizer-bg-light);
   border-bottom: 1px solid #e0e0e0;
+  font-size: var(--yt-summarizer-font-size-medium);
+  line-height: 1.7;
 }
 
 .explanation strong {
   color: var(--yt-summarizer-secondary);
   font-weight: 700;
-  font-size: var(--yt-summarizer-font-size-medium);
 }
 
 /* Collapsible Learn More Section */
@@ -375,6 +375,8 @@
   opacity: 1;
   margin-top: 16px;
   padding: 0 16px 16px 16px;
+  font-size: var(--yt-summarizer-font-size-medium);
+  line-height: 1.7;
 }
 
 .explanation-section.collapsed .explanation-content,
@@ -483,6 +485,31 @@
 
 .qa-section.collapsed .toggle-icon {
   transform: rotate(-90deg);
+}
+
+/* Q&A pairs improved styling */
+.qa {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.qa:last-child {
+  margin-bottom: 0;
+  padding-bottom: 16px;
+  border-bottom: none;
+}
+
+.question {
+  font-weight: 600;
+  color: var(--yt-summarizer-primary);
+  margin-bottom: 8px;
+}
+
+.answer {
+  color: var(--yt-summarizer-text-primary);
+  padding-left: 16px;
+  border-left: 3px solid var(--yt-summarizer-secondary);
 }
 
 /* Error Help Section */
@@ -992,4 +1019,39 @@ html[system-theme="dark"] .topic-summary strong.section-title {
 html[dark] .explanation-header strong.section-title,
 html[system-theme="dark"] .explanation-header strong.section-title {
   color: #7cdcde;
+}
+
+/* Fix for font size consistency in detailed summary sections */
+.topic-summary,
+.explanation-content,
+.qa-content {
+  font-size: var(--yt-summarizer-font-size-medium);
+  line-height: 1.7;
+}
+
+.explanation {
+  font-size: var(--yt-summarizer-font-size-medium);
+  line-height: 1.7;
+}
+
+/* Ensure content inside these sections has consistent font size */
+.topic-summary p,
+.explanation p,
+.qa-content p {
+  font-size: var(--yt-summarizer-font-size-medium);
+  line-height: 1.7;
+}
+
+.question, 
+.answer {
+  font-size: var(--yt-summarizer-font-size-medium);
+  line-height: 1.7;
+}
+
+/* Ensure section titles have consistent size */
+.section-title {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: var(--yt-summarizer-font-size-medium);
+  color: var(--yt-summarizer-secondary);
 }
