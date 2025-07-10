@@ -13,6 +13,10 @@ class YouTubeContentScript {
 
   init() {
     this.log('Initializing YouTube Content Script');
+    
+    // Initialize current video ID
+    this.currentVideoId = this.extractVideoId(window.location.href);
+    
     this.setupMessageListener();
     // Wait for page to load before adding button
     if (document.readyState === 'loading') {
@@ -50,6 +54,91 @@ class YouTubeContentScript {
         return true;
       }
     });
+  }
+
+  observeVideoChanges() {
+    this.log('Setting up video change observation');
+    
+    // Watch for URL changes (YouTube is a SPA)
+    let currentUrl = window.location.href;
+    const urlObserver = new MutationObserver(() => {
+      if (window.location.href !== currentUrl) {
+        currentUrl = window.location.href;
+        this.log('URL changed to:', currentUrl);
+        
+        // Extract video ID from new URL
+        const videoId = this.extractVideoId(currentUrl);
+        if (videoId && videoId !== this.currentVideoId) {
+          this.currentVideoId = videoId;
+          this.log('Video changed to:', videoId);
+          
+          // Remove existing summary panel
+          if (this.summaryPanel) {
+            this.summaryPanel.remove();
+            this.summaryPanel = null;
+          }
+          
+          // Re-add summary button for new video
+          setTimeout(() => this.addSummaryButton(), 2000);
+        }
+      }
+    });
+    
+    // Observe changes to the document
+    urlObserver.observe(document, { childList: true, subtree: true });
+    
+    // Also watch for pushstate/popstate events
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+    
+    const self = this;
+    history.pushState = function(...args) {
+      originalPushState.apply(history, args);
+      setTimeout(() => {
+        const videoId = self.extractVideoId(window.location.href);
+        if (videoId && videoId !== self.currentVideoId) {
+          self.handleVideoChange(videoId);
+        }
+      }, 100);
+    };
+    
+    history.replaceState = function(...args) {
+      originalReplaceState.apply(history, args);
+      setTimeout(() => {
+        const videoId = self.extractVideoId(window.location.href);
+        if (videoId && videoId !== self.currentVideoId) {
+          self.handleVideoChange(videoId);
+        }
+      }, 100);
+    };
+    
+    window.addEventListener('popstate', () => {
+      setTimeout(() => {
+        const videoId = self.extractVideoId(window.location.href);
+        if (videoId && videoId !== self.currentVideoId) {
+          self.handleVideoChange(videoId);
+        }
+      }, 100);
+    });
+  }
+
+  extractVideoId(url) {
+    const match = url.match(/[?&]v=([^&]+)/);
+    return match ? match[1] : null;
+  }
+
+  handleVideoChange(videoId) {
+    this.currentVideoId = videoId;
+    this.log('Handling video change to:', videoId);
+    
+    // Remove existing summary panel
+    if (this.summaryPanel) {
+      this.summaryPanel.remove();
+      this.summaryPanel = null;
+    }
+    
+    // Re-add summary button for new video
+    setTimeout(() => this.addSummaryButton(), 2000);
   }
 
   // Improved video information extraction with multiple fallback methods
@@ -718,6 +807,12 @@ class YouTubeContentScript {
         detailsButton.addEventListener('click', () => this.handleDetailedSummaryRequest());
       }
     }
+    
+    // Set up event listener for the download button
+    const downloadButton = panel.querySelector('#download-summary');
+    if (downloadButton) {
+      downloadButton.addEventListener('click', () => this.handleDownloadSummary(data));
+    }
   }
 
   generateInitialSummaryHTML(data) {
@@ -760,6 +855,13 @@ class YouTubeContentScript {
           <div class="detailed-info">Detailed summary includes Q&A, explanations, and more!</div>
         </div>
 
+        <div class="download-container">
+          <button id="download-summary" class="download-button">
+            <span class="button-icon">💾</span> Download Summary
+          </button>
+          <div class="download-info">Save this summary as an HTML file</div>
+        </div>
+
         <div class="footer">
           <p>✨ This summary was created to help kids understand the video better!</p>
         </div>
@@ -768,7 +870,7 @@ class YouTubeContentScript {
   }
 
   generateDetailedSummaryHTML(data) {
-    const { videoInfo, summary, processedTopics, topicConnections } = data;
+    const { videoInfo, summary, topics, processedTopics, topicConnections } = data;
     
     let connectionsHTML = '';
     if (topicConnections && topicConnections.length > 0) {
@@ -791,7 +893,7 @@ class YouTubeContentScript {
         <div class="explanation-section">
           <div class="explanation-header">
             <strong class="section-title">📖 Learn More:</strong>
-            <span class="toggle-icon">▼</span>
+            <span class="toggle-icon">►</span>
           </div>
           <div class="explanation-content">
             <div class="explanation">
@@ -802,7 +904,7 @@ class YouTubeContentScript {
         <div class="qa-section">
           <div class="qa-section-header">
             <h4>❓ Questions & Answers:</h4>
-            <span class="toggle-icon">▼</span>
+            <span class="toggle-icon">►</span>
           </div>
           <div class="qa-content">
             ${topic.qaPairs.map(qa => `
@@ -837,6 +939,13 @@ class YouTubeContentScript {
         <div class="topics">
           <h3>🎯 Main Topics:</h3>
           ${topicsHTML}
+        </div>
+
+        <div class="download-container">
+          <button id="download-summary" class="download-button">
+            <span class="button-icon">💾</span> Download Summary
+          </button>
+          <div class="download-info">Save this detailed summary as an HTML file</div>
         </div>
 
         <div class="footer">
@@ -993,12 +1102,16 @@ class YouTubeContentScript {
         section.style.display = 'none';
       });
       
-      // Setup toggle functionality
+      // Setup toggle functionality and set initial arrow direction
       const toggleHeaders = this.summaryPanel.querySelectorAll('.explanation-header, .qa-section-header');
       toggleHeaders.forEach(header => {
         // Remove any existing listeners
         const newHeader = header.cloneNode(true);
         header.parentNode.replaceChild(newHeader, header);
+        
+        // Set initial arrow direction to right (collapsed state)
+        const icon = newHeader.querySelector('.toggle-icon');
+        if (icon) icon.textContent = '►';
         
         // Add click handler
         newHeader.addEventListener('click', () => {
@@ -1013,68 +1126,116 @@ class YouTubeContentScript {
             if (icon) icon.textContent = '►';
           }
         });
-        
-        // Set initial icon
-        const icon = newHeader.querySelector('.toggle-icon');
-        if (icon) icon.textContent = '►';
       });
-      
-      this.log('Collapsed expandable sections by default');
     } catch (error) {
       this.log('Error setting up collapsible sections:', error.message);
     }
   }
-  
-  observeVideoChanges() {
-    this.log('Setting up video change observer');
-    
-    // Track the current URL to detect navigation
-    let lastUrl = window.location.href;
-    
-    // Create a new MutationObserver to watch for URL changes
-    const urlObserver = new MutationObserver(() => {
-      // Check if URL has changed
-      if (window.location.href !== lastUrl) {
-        this.log('URL changed from', lastUrl, 'to', window.location.href);
-        lastUrl = window.location.href;
-        
-        // Remove any existing summary panel
-        this.removeSummaryPanel();
-        
-        // Check if we're on a video page
-        if (window.location.href.includes('youtube.com/watch')) {
-          this.log('New video detected, adding summary button');
-          
-          // Add a slight delay to ensure YouTube's UI has updated
-          setTimeout(() => {
-            this.addSummaryButton();
-            
-            // Reset state for new video
-            this.isProcessing = false;
-            this.retryCount = 0;
-          }, 2000);
-        }
-      }
-    });
-    
-    // Start observing document for URL changes
-    urlObserver.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-    
-    // Handle navigation events that might not trigger DOM changes
-    window.addEventListener('yt-navigate-finish', () => {
-      this.log('YouTube navigation event detected');
+
+  // Download Summary Functionality
+  async handleDownloadSummary(data) {
+    try {
+      this.log('Starting download process for summary');
       
-      // If on a video page, make sure we have a button
-      if (window.location.href.includes('youtube.com/watch')) {
-        setTimeout(() => this.addSummaryButton(), 2000);
+      const downloadButton = document.querySelector('#download-summary');
+      if (downloadButton) {
+        // Show loading state
+        const originalContent = downloadButton.innerHTML;
+        downloadButton.innerHTML = '<span class="button-icon">⏳</span> Generating...';
+        downloadButton.disabled = true;
       }
+
+      // Request HTML generation from background script
+      const response = await chrome.runtime.sendMessage({
+        action: 'downloadSummary',
+        data: data
+      });
+
+      if (response.success) {
+        this.log('Download HTML generated successfully');
+        this.triggerDownload(response.html, response.filename);
+        this.showDownloadNotification('success', 'Summary downloaded successfully!');
+      } else {
+        throw new Error(response.error || 'Failed to generate download');
+      }
+    } catch (error) {
+      this.log('Download failed:', error.message);
+      this.showDownloadNotification('error', `Download failed: ${error.message}`);
+    } finally {
+      // Restore button state
+      const downloadButton = document.querySelector('#download-summary');
+      if (downloadButton) {
+        downloadButton.innerHTML = '<span class="button-icon">💾</span> Download Summary';
+        downloadButton.disabled = false;
+      }
+    }
+  }
+
+  triggerDownload(htmlContent, filename) {
+    try {
+      // Create blob with HTML content
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
       
-      // Remove any existing summary
-      this.removeSummaryPanel();
-    });
+      // Create temporary download link
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = filename;
+      downloadLink.style.display = 'none';
+      
+      // Trigger download
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      
+      // Clean up
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      
+      this.log('Download triggered successfully:', filename);
+    } catch (error) {
+      this.log('Failed to trigger download:', error.message);
+      throw error;
+    }
+  }
+
+  showDownloadNotification(type, message) {
+    const notification = document.createElement('div');
+    const isSuccess = type === 'success';
+    
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${isSuccess ? 
+        'linear-gradient(135deg, #7ed321, #4ecdc4)' : 
+        'linear-gradient(135deg, #ff6b6b, #ff8e53)'};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      z-index: 10001;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      animation: slideInRight 0.3s ease;
+      cursor: pointer;
+      max-width: 300px;
+    `;
+    
+    notification.innerHTML = `
+      ${isSuccess ? '✅' : '❌'} ${message}
+      <br><small>Click to dismiss</small>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds or on click
+    const removeNotification = () => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    };
+    
+    notification.addEventListener('click', removeNotification);
+    setTimeout(removeNotification, 5000);
   }
 }
 
