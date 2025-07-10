@@ -37,6 +37,18 @@ class YouTubeContentScript {
           .catch(error => sendResponse({ error: error.message }));
         return true;
       }
+      
+      if (request.action === 'displaySummary') {
+        this.log('Received displaySummary message from popup');
+        try {
+          this.displaySummary(request.data);
+          sendResponse({ success: true });
+        } catch (error) {
+          this.log('Error displaying summary:', error.message);
+          sendResponse({ success: false, error: error.message });
+        }
+        return true;
+      }
     });
   }
 
@@ -677,6 +689,24 @@ class YouTubeContentScript {
     }
     
     this.insertSummaryPanel(panel);
+    
+    // Add visual highlight when summary is displayed via popup
+    if (this.summaryPanel) {
+      // Add a highlight effect to make the panel more noticeable
+      this.summaryPanel.classList.add('highlight-panel');
+      
+      // Scroll to the panel with a slight delay to ensure rendering
+      setTimeout(() => {
+        this.summaryPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Remove highlight after animation
+        setTimeout(() => {
+          if (this.summaryPanel) {
+            this.summaryPanel.classList.remove('highlight-panel');
+          }
+        }, 3000);
+      }, 500);
+    }
     
     // Ensure sections are collapsed by default
     setTimeout(() => this.collapseByDefault(), 300);

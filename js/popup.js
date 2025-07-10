@@ -4,7 +4,14 @@ class PopupController {
   constructor() {
     this.currentTab = null;
     this.isProcessing = false;
+    this.debugMode = true; // Enable for troubleshooting
     this.init();
+  }
+
+  log(message, data = null) {
+    if (this.debugMode) {
+      console.log(`[YT-Summarizer-Popup] ${message}`, data || '');
+    }
   }
 
   async init() {
@@ -143,21 +150,34 @@ class PopupController {
 
       const result = await chrome.runtime.sendMessage({
         action: 'summarizeVideo',
-        url: this.currentTab.url
+        url: this.currentTab.url,
+        phase: 'initial'  // Start with initial phase
       });
 
       if (result.success) {
         this.showResults();
         
-        // Optional: Inject the summary directly into the page
+        // Inject the summary directly into the page
         try {
-          await chrome.tabs.sendMessage(this.currentTab.id, {
+          const response = await chrome.tabs.sendMessage(this.currentTab.id, {
             action: 'displaySummary',
             data: result.data
           });
+          
+          if (response && response.success) {
+            this.log('Summary successfully injected into page');
+          } else {
+            this.log('Content script could not display summary:', response?.error || 'Unknown error');
+          }
         } catch (e) {
-          // Content script might not be ready, that's okay
-          console.log('Could not inject summary into page:', e);
+          // Content script might not be ready or loaded
+          this.log('Could not inject summary into page - content script may not be loaded:', e.message);
+          
+          // Inform user to refresh the page if content script isn't available
+          if (e.message.includes('Could not establish connection')) {
+            this.showError('Please refresh the YouTube page and try again. The content script may not be loaded yet.');
+            return;
+          }
         }
       } else {
         this.showError(result.error);
