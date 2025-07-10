@@ -994,6 +994,58 @@ class YouTubeContentScript {
       this.log('Error setting up collapsible sections:', error.message);
     }
   }
+  
+  observeVideoChanges() {
+    this.log('Setting up video change observer');
+    
+    // Track the current URL to detect navigation
+    let lastUrl = window.location.href;
+    
+    // Create a new MutationObserver to watch for URL changes
+    const urlObserver = new MutationObserver(() => {
+      // Check if URL has changed
+      if (window.location.href !== lastUrl) {
+        this.log('URL changed from', lastUrl, 'to', window.location.href);
+        lastUrl = window.location.href;
+        
+        // Remove any existing summary panel
+        this.removeSummaryPanel();
+        
+        // Check if we're on a video page
+        if (window.location.href.includes('youtube.com/watch')) {
+          this.log('New video detected, adding summary button');
+          
+          // Add a slight delay to ensure YouTube's UI has updated
+          setTimeout(() => {
+            this.addSummaryButton();
+            
+            // Reset state for new video
+            this.isProcessing = false;
+            this.retryCount = 0;
+          }, 2000);
+        }
+      }
+    });
+    
+    // Start observing document for URL changes
+    urlObserver.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    
+    // Handle navigation events that might not trigger DOM changes
+    window.addEventListener('yt-navigate-finish', () => {
+      this.log('YouTube navigation event detected');
+      
+      // If on a video page, make sure we have a button
+      if (window.location.href.includes('youtube.com/watch')) {
+        setTimeout(() => this.addSummaryButton(), 2000);
+      }
+      
+      // Remove any existing summary
+      this.removeSummaryPanel();
+    });
+  }
 }
 
 const youTubeContentScript = new YouTubeContentScript();
