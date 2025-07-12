@@ -674,6 +674,69 @@ class SummaryDownloadManager {
     }
   }
 
+  formatTextForHTML(text) {
+    if (!text || typeof text !== 'string') return text;
+    
+    // Convert line breaks to <br> tags
+    let formattedText = text.replace(/\n/g, '<br>');
+    
+    // Convert bullet points (* text) to proper HTML lists
+    const bulletRegex = /\* ([^*\n]+)/g;
+    if (bulletRegex.test(text)) {
+      // Split by line breaks and process
+      const lines = text.split('\n');
+      let inList = false;
+      let result = '';
+      
+      for (let line of lines) {
+        line = line.trim();
+        if (line.startsWith('* ')) {
+          if (!inList) {
+            result += '<ul>';
+            inList = true;
+          }
+          const bulletContent = line.substring(2).trim();
+          result += `<li>${this.formatInlineText(bulletContent)}</li>`;
+        } else {
+          if (inList) {
+            result += '</ul>';
+            inList = false;
+          }
+          if (line) {
+            result += `<p>${this.formatInlineText(line)}</p>`;
+          }
+        }
+      }
+      
+      if (inList) {
+        result += '</ul>';
+      }
+      
+      return result;
+    }
+    
+    // If no bullet points, just format inline text and preserve line breaks
+    return formattedText.split('<br>').map(line => {
+      line = line.trim();
+      return line ? `<p>${this.formatInlineText(line)}</p>` : '';
+    }).filter(line => line).join('');
+  }
+
+  formatInlineText(text) {
+    if (!text) return text;
+    
+    // Convert ALL CAPS words to bold (common pattern in the text)
+    text = text.replace(/\b[A-Z]{2,}\b/g, '<strong>$&</strong>');
+    
+    // Convert text between asterisks to bold
+    text = text.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+    
+    // Convert text in quotes to emphasis
+    text = text.replace(/"([^"]+)"/g, '<em>"$1"</em>');
+    
+    return text;
+  }
+
   generateDownloadableHTML(data) {
     this.log('Generating downloadable HTML for summary');
     
@@ -718,7 +781,7 @@ class SummaryDownloadManager {
         <main class="summary-content">
             <section class="overview-section">
                 <h2>📝 Video Summary</h2>
-                <div class="summary-text">${summary}</div>
+                <div class="summary-text">${this.formatTextForHTML(summary)}</div>
             </section>
 
             ${this.generateTopicsHTML(topics, processedTopics, isDetailed)}
@@ -790,7 +853,7 @@ class SummaryDownloadManager {
               ${topics.map(topic => `
                   <div class="topic-simple">
                       <h3>📚 ${topic.name}</h3>
-                      <p>${topic.content}</p>
+                      <div>${this.formatTextForHTML(topic.content)}</div>
                   </div>
               `).join('')}
           </section>
@@ -810,18 +873,18 @@ class SummaryDownloadManager {
                     <div class="topic-content">
                         <div class="topic-summary">
                             <h4>Quick Summary:</h4>
-                            <p>${topic.summary}</p>
+                            <div>${this.formatTextForHTML(topic.summary)}</div>
                         </div>
                         <div class="topic-explanation">
                             <h4>📖 Learn More:</h4>
-                            <p>${topic.explanation}</p>
+                            <div>${this.formatTextForHTML(topic.explanation)}</div>
                         </div>
                         <div class="topic-qa">
                             <h4>❓ Questions & Answers:</h4>
                             ${topic.qaPairs && topic.qaPairs.length > 0 ? topic.qaPairs.map(qa => `
                                 <div class="qa-pair">
-                                    <div class="question">Q: ${qa.question}</div>
-                                    <div class="answer">A: ${qa.answer}</div>
+                                    <div class="question">Q: ${this.formatInlineText(qa.question)}</div>
+                                    <div class="answer">A: ${this.formatTextForHTML(qa.answer)}</div>
                                 </div>
                             `).join('') : '<p>No questions available for this topic.</p>'}
                         </div>
@@ -840,7 +903,7 @@ class SummaryDownloadManager {
             ${topics.map(topic => `
                 <div class="topic-simple">
                     <h3>📚 ${topic.name}</h3>
-                    <p>${topic.content}</p>
+                    <div>${this.formatTextForHTML(topic.content)}</div>
                 </div>
             `).join('')}
         </section>
@@ -969,6 +1032,32 @@ class SummaryDownloadManager {
           font-size: 16px;
       }
 
+      /* Formatting for structured text content */
+      .summary-text p, .topic-simple div p, .topic-summary div p, .topic-explanation div p {
+          margin-bottom: 12px;
+          line-height: 1.6;
+      }
+
+      .summary-text ul, .topic-simple div ul, .topic-summary div ul, .topic-explanation div ul {
+          margin: 15px 0;
+          padding-left: 20px;
+      }
+
+      .summary-text li, .topic-simple div li, .topic-summary div li, .topic-explanation div li {
+          margin-bottom: 8px;
+          line-height: 1.5;
+      }
+
+      .summary-text strong, .topic-simple div strong, .topic-summary div strong, .topic-explanation div strong, .answer strong {
+          color: #ff6b6b;
+          font-weight: bold;
+      }
+
+      .summary-text em, .topic-simple div em, .topic-summary div em, .topic-explanation div em {
+          font-style: italic;
+          color: #666;
+      }
+
       .topic-simple, .topic-detailed {
           background: #e8f4f8;
           border-radius: 10px;
@@ -1043,6 +1132,18 @@ class SummaryDownloadManager {
       .answer {
           color: #333;
           padding-left: 15px;
+      }
+
+      .answer p {
+          margin-bottom: 8px;
+      }
+
+      .answer ul {
+          margin: 10px 0 10px 15px;
+      }
+
+      .answer li {
+          margin-bottom: 5px;
       }
 
       .connections-list {

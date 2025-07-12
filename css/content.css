@@ -1169,3 +1169,40 @@ html[system-theme="dark"] .explanation-header strong.section-title {
   font-size: var(--yt-summarizer-font-size-medium);
   color: var(--yt-summarizer-secondary);
 }
+
+/* Formatting for structured text content in panels */
+.yt-summarizer-panel .topic-summary div p,
+.yt-summarizer-panel .explanation div p,
+.yt-summarizer-panel .answer p {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.yt-summarizer-panel .topic-summary div ul,
+.yt-summarizer-panel .explanation div ul,
+.yt-summarizer-panel .answer ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.yt-summarizer-panel .topic-summary div li,
+.yt-summarizer-panel .explanation div li,
+.yt-summarizer-panel .answer li {
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+
+.yt-summarizer-panel .topic-summary div strong,
+.yt-summarizer-panel .explanation div strong,
+.yt-summarizer-panel .answer strong,
+.yt-summarizer-panel .question strong {
+  color: var(--yt-summarizer-primary);
+  font-weight: bold;
+}
+
+.yt-summarizer-panel .topic-summary div em,
+.yt-summarizer-panel .explanation div em,
+.yt-summarizer-panel .answer em {
+  font-style: italic;
+  color: var(--yt-summarizer-text-secondary);
+}

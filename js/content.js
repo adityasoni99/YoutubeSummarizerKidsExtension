@@ -1237,6 +1237,642 @@ class YouTubeContentScript {
     notification.addEventListener('click', removeNotification);
     setTimeout(removeNotification, 5000);
   }
+
+  formatTextForHTML(text) {
+    if (!text || typeof text !== 'string') return text;
+    
+    // Convert line breaks to <br> tags
+    let formattedText = text.replace(/\n/g, '<br>');
+    
+    // Convert bullet points (* text) to proper HTML lists
+    const bulletRegex = /\* ([^*\n]+)/g;
+    if (bulletRegex.test(text)) {
+      // Split by line breaks and process
+      const lines = text.split('\n');
+      let inList = false;
+      let result = '';
+      
+      for (let line of lines) {
+        line = line.trim();
+        if (line.startsWith('* ')) {
+          if (!inList) {
+            result += '<ul>';
+            inList = true;
+          }
+          const bulletContent = line.substring(2).trim();
+          result += `<li>${this.formatInlineText(bulletContent)}</li>`;
+        } else {
+          if (inList) {
+            result += '</ul>';
+            inList = false;
+          }
+          if (line) {
+            result += `<p>${this.formatInlineText(line)}</p>`;
+          }
+        }
+      }
+      
+      if (inList) {
+        result += '</ul>';
+      }
+      
+      return result;
+    }
+    
+    // If no bullet points, just format inline text and preserve line breaks
+    return formattedText.split('<br>').map(line => {
+      line = line.trim();
+      return line ? `<p>${this.formatInlineText(line)}</p>` : '';
+    }).filter(line => line).join('');
+  }
+
+  formatInlineText(text) {
+    if (!text) return text;
+    
+    // Convert ALL CAPS words to bold (common pattern in the text)
+    text = text.replace(/\b[A-Z]{2,}\b/g, '<strong>$&</strong>');
+    
+    // Convert text between asterisks to bold
+    text = text.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+    
+    // Convert text in quotes to emphasis
+    text = text.replace(/"([^"]+)"/g, '<em>"$1"</em>');
+    
+    return text;
+  }
+
+  showSuccessNotification() {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #7ed321, #4ecdc4);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      z-index: 10001;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      animation: slideInRight 0.3s ease;
+      cursor: pointer;
+    `;
+    notification.innerHTML = '✅ Summary Created!<br><small>Click here to scroll to it!</small>';
+    
+    document.body.appendChild(notification);
+    
+    // Add click event to scroll to the summary panel
+    notification.addEventListener('click', () => {
+      if (this.summaryPanel) {
+        this.summaryPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Add a highlight effect to make the panel more noticeable
+        this.summaryPanel.classList.add('highlight-panel');
+        setTimeout(() => {
+          this.summaryPanel.classList.remove('highlight-panel');
+        }, 2000);
+      }
+      notification.remove();
+    });
+    
+    setTimeout(() => {
+      notification.remove();
+    }, 6000);
+  }
+
+  showError(message, showOptions = false) {
+    this.log('Showing error:', message);
+    
+    // Remove existing panels
+    this.removeSummaryPanel();
+    
+    const errorPanel = document.createElement('div');
+    errorPanel.className = 'yt-summarizer-panel error';
+    
+    const optionsButton = showOptions ? `
+      <div style="margin-top: 16px;">
+        <button onclick="chrome.runtime.openOptionsPage()" style="
+          background: #ff9f43;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 600;
+        ">Open Extension Options</button>
+      </div>
+    ` : '';
+    
+    errorPanel.innerHTML = `
+      <div class="panel-header error">
+        <h3>❌ Oops! Something went wrong</h3>
+        <button class="close-btn" onclick="this.parentElement.parentElement.remove()">×</button>
+      </div>
+      <div class="panel-content">
+        <p><strong>Error:</strong> ${message}</p>
+        <div class="error-help">
+          <p><strong>Troubleshooting Steps:</strong></p>
+          <ul>
+            <li>Make sure you have a Gemini API key configured in extension options</li>
+            <li>Try refreshing the page and clicking the button again</li>
+            <li>Try a different educational video that might have captions or description</li>
+            <li>Check that the video is publicly available and not age-restricted</li>
+            <li>Make sure your internet connection is stable</li>
+          </ul>
+        </div>
+        ${optionsButton}
+        <div style="margin-top: 16px; text-align: center;">
+          <button onclick="location.reload()" style="
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 8px;
+          ">Try Again</button>
+        </div>
+      </div>
+    `;
+
+    this.insertSummaryPanel(errorPanel);
+  }
+
+  displaySummary(data) {
+    this.log('Displaying summary:', data);
+    this.removeSummaryPanel();
+    
+    const panel = document.createElement('div');
+    panel.className = 'yt-summarizer-panel';
+    
+    // Choose HTML generation method based on processing state
+    if (data.processingState === 'initial') {
+      panel.innerHTML = this.generateInitialSummaryHTML(data);
+    } else {
+      panel.innerHTML = this.generateDetailedSummaryHTML(data);
+    }
+    
+    this.insertSummaryPanel(panel);
+    
+    // Add visual highlight when summary is displayed via popup
+    if (this.summaryPanel) {
+      // Add a highlight effect to make the panel more noticeable
+      this.summaryPanel.classList.add('highlight-panel');
+      
+      // Scroll to the panel with a slight delay to ensure rendering
+      setTimeout(() => {
+        this.summaryPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Remove highlight after animation
+        setTimeout(() => {
+          if (this.summaryPanel) {
+            this.summaryPanel.classList.remove('highlight-panel');
+          }
+        }, 3000);
+      }, 500);
+    }
+    
+    // Ensure sections are collapsed by default
+    setTimeout(() => this.collapseByDefault(), 300);
+    
+    // Set up event listeners for the "View Detailed Summary" button if in initial state
+    if (data.processingState === 'initial') {
+      const detailsButton = panel.querySelector('#view-detailed-summary');
+      if (detailsButton) {
+        detailsButton.addEventListener('click', () => this.handleDetailedSummaryRequest());
+      }
+    }
+    
+    // Set up event listener for the download button
+    const downloadButton = panel.querySelector('#download-summary');
+    if (downloadButton) {
+      downloadButton.addEventListener('click', () => this.handleDownloadSummary(data));
+    }
+  }
+
+  generateInitialSummaryHTML(data) {
+    const { videoInfo, summary, topics } = data;
+    
+    const topicsHTML = topics.map(topic => `
+      <div class="topic-initial">
+        <h3>📚 ${topic.name}</h3>
+        <div class="topic-content">
+          ${topic.content}
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="panel-header">
+        <h2>🎬 Kid-Friendly Summary</h2>
+        <button class="close-btn" onclick="this.parentElement.parentElement.remove()">×</button>
+      </div>
+      <div class="panel-content">
+        <div class="video-info">
+          <img src="${videoInfo.thumbnailUrl}" alt="Video thumbnail" class="thumbnail" onerror="this.style.display='none'" />
+          <h3>${videoInfo.title}</h3>
+        </div>
+        
+        <div class="summary">
+          <h3>📝 What's this video about?</h3>
+          <p>${summary}</p>
+        </div>
+
+        <div class="topics">
+          <h3>🎯 Main Topics:</h3>
+          ${topicsHTML}
+        </div>
+
+        <div class="view-detailed-container">
+          <button id="view-detailed-summary" class="view-detailed-button">
+            <span class="button-icon">🔍</span> View Detailed Summary
+          </button>
+          <div class="detailed-info">Detailed summary includes Q&A, explanations, and more!</div>
+        </div>
+
+        <div class="download-container">
+          <button id="download-summary" class="download-button">
+            <span class="button-icon">💾</span> Download Summary
+          </button>
+          <div class="download-info">Save this summary as an HTML file</div>
+        </div>
+
+        <div class="footer">
+          <p>✨ This summary was created to help kids understand the video better!</p>
+        </div>
+      </div>
+    `;
+  }
+
+  generateDetailedSummaryHTML(data) {
+    const { videoInfo, summary, topics, processedTopics, topicConnections } = data;
+    
+    let connectionsHTML = '';
+    if (topicConnections && topicConnections.length > 0) {
+      connectionsHTML = `
+        <div class="connections">
+          <h3>🔗 How these topics connect:</h3>
+          <ul>
+            ${topicConnections.map(conn => `<li>${conn}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+
+    const topicsHTML = processedTopics.map(topic => `
+      <div class="topic">
+        <h3>📚 ${topic.name}</h3>
+        <div class="topic-summary">
+          <strong class="section-title">Quick Summary:</strong> ${topic.summary}
+        </div>
+        <div class="explanation-section">
+          <div class="explanation-header">
+            <strong class="section-title">📖 Learn More:</strong>
+            <span class="toggle-icon">►</span>
+          </div>
+          <div class="explanation-content">
+            <div class="explanation">
+              ${topic.explanation}
+            </div>
+          </div>
+        </div>
+        <div class="qa-section">
+          <div class="qa-section-header">
+            <h4>❓ Questions & Answers:</h4>
+            <span class="toggle-icon">►</span>
+          </div>
+          <div class="qa-content">
+            ${topic.qaPairs.map(qa => `
+              <div class="qa">
+                <div class="question">Q: ${qa.question}</div>
+                <div class="answer">A: ${qa.answer}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="panel-header">
+        <h2>🎬 Kid-Friendly Detailed Summary</h2>
+        <button class="close-btn" onclick="this.parentElement.parentElement.remove()">×</button>
+      </div>
+      <div class="panel-content">
+        <div class="video-info">
+          <img src="${videoInfo.thumbnailUrl}" alt="Video thumbnail" class="thumbnail" onerror="this.style.display='none'" />
+          <h3>${videoInfo.title}</h3>
+        </div>
+        
+        <div class="summary">
+          <h3>📝 What's this video about?</h3>
+          <p>${summary}</p>
+        </div>
+
+        ${connectionsHTML}
+
+        <div class="topics">
+          <h3>🎯 Main Topics:</h3>
+          ${topicsHTML}
+        </div>
+
+        <div class="download-container">
+          <button id="download-summary" class="download-button">
+            <span class="button-icon">💾</span> Download Summary
+          </button>
+          <div class="download-info">Save this detailed summary as an HTML file</div>
+        </div>
+
+        <div class="footer">
+          <p>✨ This detailed summary was created to help kids understand the video better!</p>
+        </div>
+      </div>
+    `;
+  }
+
+  async handleDetailedSummaryRequest() {
+    try {
+      this.log('Requesting detailed summary...');
+      
+      // Find the detailed button and replace with loading indicator
+      const detailsButton = document.querySelector('#view-detailed-summary');
+      if (detailsButton) {
+        detailsButton.innerHTML = '<span class="loading-spinner"></span> Processing Detailed Summary...';
+        detailsButton.disabled = true;
+      }
+      
+      // Get current video URL
+      const url = window.location.href;
+      
+      // Request detailed processing from background script
+      const result = await chrome.runtime.sendMessage({
+        action: 'summarizeVideo',
+        url,
+        phase: 'detailed'
+      });
+      
+      if (result.success) {
+        this.log('Detailed summary received:', result);
+        this.displaySummary(result.data);
+      } else {
+        throw new Error(result.error || 'Failed to process detailed summary');
+      }
+    } catch (error) {
+      this.log('Error getting detailed summary:', error.message);
+      
+      // Show error message
+      const detailsButton = document.querySelector('#view-detailed-summary');
+      if (detailsButton) {
+        detailsButton.innerHTML = '❌ Error: Could not generate detailed summary';
+        detailsButton.disabled = true;
+      }
+    }
+  }
+
+  insertSummaryPanel(panel) {
+    try {
+      this.log('Inserting summary panel...');
+      
+      // Strategy 1: Try to insert in comments section first
+      const commentsSection = document.querySelector('#comments');
+      if (commentsSection) {
+        commentsSection.parentNode.insertBefore(panel, commentsSection);
+        this.log('Panel inserted before comments section');
+        
+        // Scroll to the panel with a slight delay to ensure rendering
+        setTimeout(() => {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+        
+        this.summaryPanel = panel;
+        return true;
+      }
+      
+      // Strategy 2: Try to insert after video info
+      const videoInfo = document.querySelector('#info, #meta, #info-contents');
+      if (videoInfo) {
+        videoInfo.parentNode.insertBefore(panel, videoInfo.nextSibling);
+        this.log('Panel inserted after video info');
+        
+        setTimeout(() => {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+        
+        this.summaryPanel = panel;
+        return true;
+      }
+      
+      // Strategy 3: Insert after primary column
+      const primaryColumn = document.querySelector('#primary, #primary-inner');
+      if (primaryColumn) {
+        primaryColumn.appendChild(panel);
+        this.log('Panel appended to primary column');
+        
+        setTimeout(() => {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+        
+        this.summaryPanel = panel;
+        return true;
+      }
+      
+      // Strategy 4: Fallback - insert as floating panel
+      panel.style.position = 'fixed';
+      panel.style.top = '80px';
+      panel.style.right = '20px';
+      panel.style.maxWidth = '400px';
+      panel.style.maxHeight = '80vh';
+      panel.style.overflowY = 'auto';
+      panel.style.zIndex = '9999';
+      panel.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+      
+      document.body.appendChild(panel);
+      this.log('Panel inserted as floating element');
+      
+      this.summaryPanel = panel;
+      return true;
+    } catch (error) {
+      this.log('Failed to insert panel:', error.message);
+      
+      // Last resort - append to body
+      try {
+        document.body.appendChild(panel);
+        this.log('Panel appended to body as last resort');
+        this.summaryPanel = panel;
+        return true;
+      } catch (finalError) {
+        this.log('All insertion methods failed:', finalError.message);
+        return false;
+      }
+    }
+  }
+
+  removeSummaryPanel() {
+    try {
+      // Remove existing panel if present
+      if (this.summaryPanel) {
+        this.summaryPanel.remove();
+        this.summaryPanel = null;
+        this.log('Existing summary panel removed');
+      }
+      
+      // Clean up any other panels that might be orphaned
+      const existingPanels = document.querySelectorAll('.yt-summarizer-panel');
+      existingPanels.forEach(panel => {
+        panel.remove();
+        this.log('Cleaned up orphaned panel');
+      });
+    } catch (error) {
+      this.log('Error removing panels:', error.message);
+    }
+  }
+
+  collapseByDefault() {
+    try {
+      if (!this.summaryPanel) return;
+      
+      // Collapse all expandable sections by default
+      const expandableSections = this.summaryPanel.querySelectorAll('.explanation-content, .qa-content');
+      expandableSections.forEach(section => {
+        section.style.display = 'none';
+      });
+      
+      // Setup toggle functionality and set initial arrow direction
+      const toggleHeaders = this.summaryPanel.querySelectorAll('.explanation-header, .qa-section-header');
+      toggleHeaders.forEach(header => {
+        // Remove any existing listeners
+        const newHeader = header.cloneNode(true);
+        header.parentNode.replaceChild(newHeader, header);
+        
+        // Set initial arrow direction to right (collapsed state)
+        const icon = newHeader.querySelector('.toggle-icon');
+        if (icon) icon.textContent = '►';
+        
+        // Add click handler
+        newHeader.addEventListener('click', () => {
+          const content = newHeader.nextElementSibling;
+          const icon = newHeader.querySelector('.toggle-icon');
+          
+          if (content.style.display === 'none') {
+            content.style.display = 'block';
+            if (icon) icon.textContent = '▼';
+          } else {
+            content.style.display = 'none';
+            if (icon) icon.textContent = '►';
+          }
+        });
+      });
+    } catch (error) {
+      this.log('Error setting up collapsible sections:', error.message);
+    }
+  }
+
+  // Download Summary Functionality
+  async handleDownloadSummary(data) {
+    try {
+      this.log('Starting download process for summary');
+      
+      const downloadButton = document.querySelector('#download-summary');
+      if (downloadButton) {
+        // Show loading state
+        const originalContent = downloadButton.innerHTML;
+        downloadButton.innerHTML = '<span class="button-icon">⏳</span> Generating...';
+        downloadButton.disabled = true;
+      }
+
+      // Request HTML generation from background script
+      const response = await chrome.runtime.sendMessage({
+        action: 'downloadSummary',
+        data: data
+      });
+
+      if (response.success) {
+        this.log('Download HTML generated successfully');
+        this.triggerDownload(response.html, response.filename);
+        this.showDownloadNotification('success', 'Summary downloaded successfully!');
+      } else {
+        throw new Error(response.error || 'Failed to generate download');
+      }
+    } catch (error) {
+      this.log('Download failed:', error.message);
+      this.showDownloadNotification('error', `Download failed: ${error.message}`);
+    } finally {
+      // Restore button state
+      const downloadButton = document.querySelector('#download-summary');
+      if (downloadButton) {
+        downloadButton.innerHTML = '<span class="button-icon">💾</span> Download Summary';
+        downloadButton.disabled = false;
+      }
+    }
+  }
+
+  triggerDownload(htmlContent, filename) {
+    try {
+      // Create blob with HTML content
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create temporary download link
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = filename;
+      downloadLink.style.display = 'none';
+      
+      // Trigger download
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      
+      // Clean up
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      
+      this.log('Download triggered successfully:', filename);
+    } catch (error) {
+      this.log('Failed to trigger download:', error.message);
+      throw error;
+    }
+  }
+
+  showDownloadNotification(type, message) {
+    const notification = document.createElement('div');
+    const isSuccess = type === 'success';
+    
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${isSuccess ? 
+        'linear-gradient(135deg, #7ed321, #4ecdc4)' : 
+        'linear-gradient(135deg, #ff6b6b, #ff8e53)'};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      z-index: 10001;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      animation: slideInRight 0.3s ease;
+      cursor: pointer;
+      max-width: 300px;
+    `;
+    
+    notification.innerHTML = `
+      ${isSuccess ? '✅' : '❌'} ${message}
+      <br><small>Click to dismiss</small>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds or on click
+    const removeNotification = () => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    };
+    
+    notification.addEventListener('click', removeNotification);
+    setTimeout(removeNotification, 5000);
+  }
 }
 
 const youTubeContentScript = new YouTubeContentScript();
