@@ -16,14 +16,17 @@ This Chrome Extension creates child-friendly summaries of YouTube videos, making
 
 ### ✨ Key Features
 
-- 🎯 **Kid-Friendly Summaries**: Converts complex video content into simple, age-appropriate explanations
+- 🎯 **Two-Phase Summarization**: Quick initial summaries followed by detailed analysis
 - ❓ **Interactive Q&A**: Generates engaging question-answer pairs for each topic
+- 📥 **Download Summaries**: Save beautiful HTML files with complete summaries
+- 🔄 **Collapsible Sections**: Interactive expandable content for better organization
 - 🎨 **Beautiful Design**: Colorful, engaging interface designed specifically for children
 - 🔧 **Age Customization**: Adjustable content complexity for different age groups (3-5, 6-8, 9-12 years)
-- 🌍 **Multilingual Support**: Summary generation in multiple languages
-- ♿ **Accessibility Features**: Large fonts, high contrast mode, and text-to-speech ready
+- 📝 **Rich Text Formatting**: Proper bullet points, bold text, and structured content
+- 🌙 **Dark Mode Support**: Automatic adaptation to YouTube's dark theme
+- ♿ **Accessibility Features**: High contrast, responsive design, and keyboard navigation
 - 🚀 **Manifest V3**: Modern, secure Chrome Extension architecture
-- 🤖 **AI-Powered**: Uses Google's Gemini API for intelligent content processing
+- 🤖 **AI-Powered**: Uses Google's Gemini 2.0 Flash for intelligent content processing
 
 ## 🏗️ Architecture
 
@@ -37,38 +40,47 @@ flowchart TD
     validate -->|Valid| transcript[Get Transcript]
     validate -->|Invalid| error[Error]
     
-    transcript --> topics[Generate Topics]
+    transcript --> topics[Generate Topics & Initial Summary]
     
-    subgraph map[Map Phase - Batch Processing]
-        topics --> batch[Topic Processor]
-        batch --> topic1[Process Topic 1]
-        batch --> topic2[Process Topic 2] 
-        batch --> topic3[Process Topic 3]
-        batch --> topicN[Process Topic N]
+    subgraph initial[Initial Phase]
+        topics --> display1[Display Quick Summary]
+        display1 --> download1[Download Option]
     end
     
-    subgraph reduce[Reduce Phase]
-        topic1 --> combine[Combine Results]
-        topic2 --> combine
-        topic3 --> combine
-        topicN --> combine
-        combine --> summary[Create Overall Summary]
+    subgraph detailed[Detailed Phase - On Demand]
+        display1 -->|User Requests Detailed| map[Map Phase - Batch Processing]
+        map --> topic1[Process Topic 1]
+        map --> topic2[Process Topic 2] 
+        map --> topic3[Process Topic 3]
+        map --> topicN[Process Topic N]
+        
+        topic1 --> reduce[Reduce Phase]
+        topic2 --> reduce
+        topic3 --> reduce
+        topicN --> reduce
+        
+        reduce --> combine[Combine Results]
+        combine --> detailed_summary[Create Detailed Summary]
+        detailed_summary --> display2[Display Detailed Summary]
+        display2 --> download2[Download Detailed HTML]
     end
-    
-    summary --> display[Display Summary]
-    display --> output[Kid-Friendly Output]
 ```
 
 ### Node Implementation
 
-Following PocketFlow's node-based architecture:
+Following PocketFlow's node-based architecture with two-phase processing:
 
+**Phase 1 - Initial Summary (Fast):**
 1. **ValidateURL Node**: Validates YouTube URLs
 2. **GetTranscript Node**: Extracts video transcripts and metadata
-3. **GenerateTopics Node**: Identifies main topics using AI
-4. **TopicProcessor BatchNode**: Processes each topic independently (Map phase)
-5. **CombineTopics Node**: Combines and refines results (Reduce phase)
-6. **CreateSummary Node**: Generates overall child-friendly summary
+3. **GenerateTopics Node**: Identifies main topics and creates initial summary
+4. **DisplayInitial Node**: Shows quick summary with topic overview
+
+**Phase 2 - Detailed Analysis (On Demand):**
+5. **TopicProcessor BatchNode**: Processes each topic independently (Map phase)
+6. **CombineTopics Node**: Combines and refines results (Reduce phase)
+7. **CreateDetailedSummary Node**: Generates comprehensive summary
+8. **DownloadManager Node**: Creates formatted HTML files for download
 
 ## 🚀 Installation
 
@@ -116,26 +128,46 @@ Following PocketFlow's node-based architecture:
 
 1. **Navigate** to any YouTube video
 2. **Look for** the "🎬 Kid-Friendly Summary" button (appears automatically)
-3. **Select** your child's age group (3-5, 6-8, or 9-12 years)
-4. **Click** "Create Kid-Friendly Summary"
-5. **Read** the generated summary with Q&A pairs!
+3. **Click** "Create Kid-Friendly Summary" for quick overview
+4. **View** the initial summary with main topics
+5. **Download** the quick summary as HTML (optional)
+6. **Click** "View Detailed Summary" for in-depth analysis
+7. **Explore** interactive collapsible sections with Q&A
+8. **Download** the detailed summary as formatted HTML
+
+### Two-Phase Approach
+
+#### 📊 **Quick Summary (Phase 1)**
+- Fast initial analysis (5-10 seconds)
+- Main topic identification
+- Brief overview suitable for quick reading
+- Downloadable as "Quick Summary" HTML
+
+#### 🔍 **Detailed Summary (Phase 2)**
+- Comprehensive analysis (15-30 seconds)
+- Detailed explanations for each topic
+- Interactive Q&A sections
+- Collapsible content organization
+- Downloadable as "Detailed Summary" HTML
 
 ### Advanced Features
+
+#### Interactive Content
+- **Collapsible Sections**: Click to expand/collapse detailed explanations
+- **Q&A Pairs**: Engaging questions with simple answers
+- **Rich Formatting**: Bullet points, bold text, and structured content
+- **Dark Mode**: Automatic adaptation to YouTube's theme
+
+#### Download Options
+- **Quick Summary**: Lightweight HTML with main topics
+- **Detailed Summary**: Complete interactive HTML with all content
+- **Formatted Output**: Professional styling with proper typography
+- **Print-Ready**: Optimized for printing and sharing
 
 #### Age Customization
 - **3-5 years**: Very simple words and basic concepts
 - **6-8 years**: Elementary school level explanations  
 - **9-12 years**: More detailed but still kid-friendly content
-
-#### Accessibility Options
-- **Large Fonts**: Increase text size for better readability
-- **High Contrast**: Enhanced visibility for visual impairments
-- **Text-to-Speech**: Audio reading support (coming soon)
-
-#### Language Support
-Choose from multiple languages for summary generation:
-- English, Spanish, French, German, Italian, Portuguese
-- Chinese, Japanese, Korean (requires video captions in target language)
 
 ## ⚙️ Configuration
 
@@ -144,26 +176,38 @@ Choose from multiple languages for summary generation:
 1. **Get API Key**:
    - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
    - Sign in with Google account
-   - Create a new API key
+   - Create a new API key (Gemini 2.0 Flash recommended)
    - Copy the key securely
 
 2. **Configure Extension**:
    - Open extension options page
    - Paste API key in the designated field
-   - Test the connection
+   - Test the connection with built-in validator
    - Save settings
 
 ### Settings Options
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Default Age Group | Target age for content adaptation | 6-8 years |
-| Summary Language | Language for generated content | English |
-| Maximum Topics | Number of topics to extract per video | 5 |
-| Summary Length | Overall summary length | Medium (4-5 sentences) |
-| Large Fonts | Accessibility enhancement | Disabled |
-| High Contrast | Visual accessibility mode | Disabled |
-| Auto-detect Videos | Show button on new videos | Enabled |
+| Setting | Description | Default | Status |
+|---------|-------------|---------|---------|
+| Default Age Group | Target age for content adaptation | 6-8 years | ✅ Implemented |
+| API Key | Gemini 2.0 Flash API authentication | None | ✅ Implemented |
+| Summary Mode | Quick vs Detailed analysis preference | Both available | ✅ Implemented |
+| Content Safety | Child-safe filtering level | Strict | ✅ Implemented |
+| Download Format | HTML export styling | Professional | ✅ Implemented |
+| Display Theme | Light/Dark mode preference | Auto (follows YouTube) | ✅ Implemented |
+
+### Advanced Configuration
+
+- **Two-Phase Processing**: Quick initial + detailed follow-up summaries
+- **Interactive Features**: Collapsible sections and Q&A formatting
+- **Download Options**: Separate HTML exports for quick and detailed summaries
+- **Dark Mode Support**: Automatic theme adaptation
+- **Rich Text Formatting**: Bullet points, bold text, and structured content
+
+### Access Options Page
+1. Click the extension icon in your browser toolbar
+2. Click the "⚙️" gear icon in the popup
+3. Or right-click the extension icon → "Options"
 
 ## 🏛️ Project Structure
 
@@ -173,23 +217,46 @@ youtube-summarizer-extension/
 ├── popup.html                 # Extension popup interface
 ├── options.html               # Settings/options page
 ├── js/
-│   ├── background.js          # Service worker (main logic)
-│   ├── content.js             # YouTube page integration
+│   ├── background.js          # Service worker (main logic + downloads)
+│   ├── content.js             # YouTube integration + navigation
 │   ├── popup.js               # Popup interface logic
 │   └── options.js             # Settings page logic
 ├── css/
-│   ├── popup.css              # Popup styling
+│   ├── popup.css              # Popup styling (dark mode support)
 │   ├── options.css            # Settings page styling
-│   └── content.css            # YouTube page injection styles
+│   └── content.css            # YouTube injection styles + formatting
 ├── images/
 │   ├── icon16.png             # Extension icons (various sizes)
 │   ├── icon32.png
 │   ├── icon48.png
 │   ├── icon128.png
 │   └── README.md              # Icon requirements
-├── utils/                     # Utility functions (if needed)
-└── README.md                  # This file
+├── design.md                  # Design specifications
+├── current_design.md          # Current implementation status
+├── TESTING.md                 # Testing procedures
+├── INSTALLATION.md            # Installation guide
+└── README.md                  # This documentation
 ```
+
+### Key Components
+
+#### `background.js` - Core Logic
+- **SummaryGenerator**: Handles Gemini API communication
+- **SummaryDownloadManager**: Creates formatted HTML downloads
+- **Two-phase processing**: Quick summaries + detailed analysis
+- **Text formatting**: Converts plain text to rich HTML content
+
+#### `content.js` - YouTube Integration  
+- **Video detection**: Automatic button injection on YouTube pages
+- **Navigation handling**: SPA navigation with `observeVideoChanges()`
+- **Summary display**: Interactive panels with collapsible sections
+- **User interface**: Age selection and summary controls
+
+#### `content.css` - Styling System
+- **Dark mode support**: Automatic theme adaptation
+- **Rich text formatting**: Bullet points, bold text, proper spacing
+- **Responsive design**: Mobile and desktop compatibility
+- **Accessibility**: High contrast and readable fonts
 
 ## 🔌 API Integration
 
@@ -362,11 +429,44 @@ We welcome contributions! Please see our contributing guidelines:
 ### Areas for Contribution
 
 - 🎨 **UI/UX Improvements**: Better visual design and user experience
-- 🌍 **Internationalization**: Add support for more languages
-- ♿ **Accessibility**: Enhance accessibility features
+- 🌍 **Internationalization**: Complete multilingual support implementation
+- ♿ **Accessibility Enhancements**: Full large fonts, high contrast, and text-to-speech
 - 🚀 **Performance**: Optimize API usage and processing speed
 - 🧪 **Testing**: Add comprehensive test coverage
 - 📚 **Documentation**: Improve documentation and tutorials
+
+### 🔮 Future Scope
+
+The following features are partially implemented or planned for future releases:
+
+#### 🌍 **Multilingual Support** (Partial Implementation)
+- **Current**: UI has language selection dropdown in options
+- **Missing**: Backend integration with Gemini API for non-English summaries
+- **Plan**: Complete implementation of multi-language prompt generation
+
+#### ♿ **Advanced Accessibility Features** (Partial Implementation)
+- **Current**: Basic options UI in settings page
+- **Missing**: Integration with main extension interface
+- **Planned Features**:
+  - Large fonts throughout extension panels
+  - High contrast mode for better visibility
+  - Text-to-speech integration for audio summaries
+  - Keyboard navigation enhancements
+
+#### 📱 **Mobile Optimization**
+- Responsive design improvements for mobile browsers
+- Touch-friendly interface elements
+- Optimized layout for smaller screens
+
+#### 🔊 **Audio Features**
+- Text-to-speech for generated summaries
+- Audio speed controls
+- Voice selection options
+
+#### 🎯 **Enhanced Targeting**
+- More granular age group settings
+- Learning difficulty adjustments
+- Special needs accommodations
 
 ## 📄 License
 
@@ -394,22 +494,54 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 #### "API Key not configured"
 - Ensure you've entered a valid Gemini API key in extension options
 - Test the API key using the "Test API Key" button
+- Make sure you're using Gemini 2.0 Flash for best results
 
 #### "Could not extract transcript"
 - Video may not have captions/subtitles available
 - Try a different video with auto-generated captions
+- Some videos may have restricted access to transcripts
 
 #### "Extension not working on YouTube"
-- Refresh the YouTube page
+- Refresh the YouTube page after installation
 - Check if extension is enabled in chrome://extensions/
-- Look for the summary button near video controls
+- Look for the "🎬 Kid-Friendly Summary" button near video title
+- Try navigating to a different video if button doesn't appear
+
+#### "Download not working"
+- Ensure pop-ups are allowed for YouTube domain
+- Check browser's download settings
+- Try downloading after summary generation completes
+- Some browsers may block automatic downloads
+
+#### "Formatting issues in downloaded files"
+- Make sure to use a modern browser (Chrome 90+, Firefox 88+)
+- Check that HTML files open in a browser, not text editor
+- Verify the download completed fully (check file size)
+
+#### "Quick vs Detailed summaries not working"
+- Allow Phase 1 to complete before requesting detailed analysis
+- Each phase may take 5-30 seconds depending on video length
+- Check console for any API rate limiting messages
 
 ### Troubleshooting
 
 1. **Check Extension Status**: Ensure extension is enabled and loaded
-2. **Verify API Key**: Test API connectivity in options page
-3. **Console Logs**: Check browser console for error messages
-4. **Reinstall**: Try removing and reinstalling the extension
+2. **Verify API Key**: Test API connectivity in options page  
+3. **Console Logs**: Check browser console (F12) for error messages
+4. **Clear Storage**: Reset extension data in chrome://extensions/
+5. **Reinstall**: Try removing and reinstalling the extension
+6. **Test Video**: Try with a known working video (educational content)
+7. **Check Permissions**: Verify extension has YouTube access permissions
+
+### Performance Tips
+
+- **API Usage**: 
+  - **Quick Summary**: 1 API call per video
+  - **Detailed Summary**: N+1 additional API calls (where N = number of topics identified, typically 3-6)
+  - **Total per video**: 1 + (N+1) = 2-7 API calls depending on topic count
+- **Cache**: Summaries are cached per video to avoid re-processing
+- **Navigation**: Extension detects YouTube SPA navigation automatically
+- **Background Processing**: Summaries generate while you continue browsing
 
 ---
 
