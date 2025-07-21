@@ -528,6 +528,65 @@ body.high-contrast {
   --bg-secondary: #f5f5f5;
 }
 
+/* Planned features styling */
+.section-planned {
+  opacity: 0.7;
+  position: relative;
+}
+
+.section-planned::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 193, 7, 0.1) 10px,
+    rgba(255, 193, 7, 0.1) 20px
+  );
+  pointer-events: none;
+  border-radius: var(--border-radius);
+}
+
+.coming-soon-badge {
+  display: inline-block;
+  background: #ffc107;
+  color: #212529;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+.checkbox-option.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.checkbox-option.disabled input[type="checkbox"] {
+  cursor: not-allowed;
+}
+
+.checkbox-option.disabled .checkbox-content {
+  cursor: not-allowed;
+}
+
+select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-secondary);
+}
+
+select:disabled option:not(:first-child) {
+  color: #999;
+}
+
 /* Animations */
 @keyframes slideIn {
   from {

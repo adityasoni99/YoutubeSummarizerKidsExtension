@@ -5,10 +5,11 @@ class OptionsController {
     this.defaultSettings = {
       geminiApiKey: '',
       defaultAge: '6-8',
-      largeFonts: false,
-      highContrast: false,
-      textToSpeech: false,
-      summaryLanguage: 'en',
+      // Planned features (disabled for now)
+      // largeFonts: false,
+      // highContrast: false, 
+      // textToSpeech: false,
+      // summaryLanguage: 'en',
       maxTopics: 5,
       summaryLength: 'medium',
       autoSummarize: true
@@ -33,13 +34,13 @@ class OptionsController {
       const ageRadio = document.querySelector(`input[name="default-age"][value="${settings.defaultAge}"]`);
       if (ageRadio) ageRadio.checked = true;
       
-      // Accessibility
-      document.getElementById('large-fonts').checked = settings.largeFonts;
-      document.getElementById('high-contrast').checked = settings.highContrast;
-      document.getElementById('text-to-speech').checked = settings.textToSpeech;
+      // Accessibility (disabled features - keep for future use but don't make functional)
+      // document.getElementById('large-fonts').checked = settings.largeFonts;
+      // document.getElementById('high-contrast').checked = settings.highContrast;
+      // document.getElementById('text-to-speech').checked = settings.textToSpeech;
       
-      // Language
-      document.getElementById('summary-language').value = settings.summaryLanguage;
+      // Language (disabled feature - keep for future use but don't make functional)
+      // document.getElementById('summary-language').value = settings.summaryLanguage;
       
       // Advanced
       document.getElementById('max-topics').value = settings.maxTopics;
@@ -114,10 +115,11 @@ class OptionsController {
       const settings = {
         geminiApiKey: document.getElementById('api-key').value.trim(),
         defaultAge: document.querySelector('input[name="default-age"]:checked').value,
-        largeFonts: document.getElementById('large-fonts').checked,
-        highContrast: document.getElementById('high-contrast').checked,
-        textToSpeech: document.getElementById('text-to-speech').checked,
-        summaryLanguage: document.getElementById('summary-language').value,
+        // Skip disabled/planned features for now
+        // largeFonts: document.getElementById('large-fonts').checked,
+        // highContrast: document.getElementById('high-contrast').checked,
+        // textToSpeech: document.getElementById('text-to-speech').checked,
+        // summaryLanguage: document.getElementById('summary-language').value,
         maxTopics: parseInt(document.getElementById('max-topics').value),
         summaryLength: document.getElementById('summary-length').value,
         autoSummarize: document.getElementById('auto-summarize').checked
@@ -293,8 +295,9 @@ class OptionsController {
   }
 
   applyAccessibilitySettings(settings) {
-    document.body.classList.toggle('large-fonts', settings.largeFonts);
-    document.body.classList.toggle('high-contrast', settings.highContrast);
+    // Disabled until features are fully implemented
+    // document.body.classList.toggle('large-fonts', settings.largeFonts);
+    // document.body.classList.toggle('high-contrast', settings.highContrast);
   }
 
   showStatus(message, type) {
