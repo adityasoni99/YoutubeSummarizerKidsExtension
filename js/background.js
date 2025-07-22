@@ -124,6 +124,10 @@ class YouTubeSummarizerFlow {
   async generateTopics() {
     this.log('Generating topics and initial summary...');
     
+    // Get user preferences for topic generation
+    const settings = await chrome.storage.sync.get(['maxTopics']);
+    const maxTopics = settings.maxTopics || 5;
+
     // Truncate transcript if too long to avoid API limits
     const maxLength = 8000;
     const transcript = this.shared.transcript.length > maxLength 
@@ -138,7 +142,7 @@ CONTENT:
 ${transcript}
 
 TASK:
-1. Identify 3-5 main topics or themes from this video content.
+1. Identify ${maxTopics} main topics or themes from this video content (or fewer if the content doesn't support that many).
 2. For each topic, create a brief description.
 3. Create a kid-friendly initial summary of the overall video (150-200 words).
 4. Format your response as JSON following this structure:
@@ -201,9 +205,9 @@ Only include valid JSON in your response.`;
     this.log('Processing topics...');
     const processedTopics = [];
     
-    // Get user's age preference
-    const ageSettings = await chrome.storage.sync.get(['preferredAge', 'defaultAge']);
-    const targetAge = ageSettings.preferredAge || ageSettings.defaultAge || '6-8';
+    // Get user's age preference from settings
+    const settings = await chrome.storage.sync.get(['defaultAge']);
+    const targetAge = settings.defaultAge || '6-8';
     this.log('Target age:', targetAge);
     
     // Process each topic independently (Map phase)
@@ -468,8 +472,18 @@ Your summary:`;
   async createDetailedSummary() {
     this.log('Creating detailed summary...');
 
-    // Get settings for target age
-    const { targetAge } = await chrome.storage.sync.get({ targetAge: '5-8' });
+    // Get settings for target age and summary preferences
+    const settings = await chrome.storage.sync.get(['defaultAge', 'summaryLength']);
+    const targetAge = settings.defaultAge || '6-8';
+    const summaryLength = settings.summaryLength || 'medium';
+
+    // Adjust word count based on length preference
+    const lengthMap = {
+      'short': '150-200 words',
+      'medium': '250-300 words',
+      'long': '350-400 words'
+    };
+    const targetLength = lengthMap[summaryLength] || lengthMap['medium'];
     
     const prompt = `You are creating a detailed summary of a YouTube video for young children (age range: ${targetAge}).
 
@@ -485,7 +499,7 @@ TASK:
 Create a thorough but accessible detailed summary that:
 1. Uses simple, engaging language suitable for children aged ${targetAge}
 2. Captures the main points and how they connect
-3. Is approximately 250-300 words
+3. Is approximately ${targetLength}
 4. Doesn't include complex terminology without explanation
 5. Uses a friendly, positive tone
 

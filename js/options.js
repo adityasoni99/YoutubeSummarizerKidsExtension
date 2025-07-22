@@ -131,8 +131,8 @@ class OptionsController {
         this.showStatus('Settings saved successfully!', 'success');
       }
       
-      // Apply accessibility settings immediately
-      this.applyAccessibilitySettings(settings);
+      // Apply accessibility settings immediately (disabled for now)
+      // this.applyAccessibilitySettings(settings);
       
     } catch (error) {
       console.error('Error saving settings:', error);

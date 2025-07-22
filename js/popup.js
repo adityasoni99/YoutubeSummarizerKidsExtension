@@ -145,8 +145,8 @@ class PopupController {
     try {
       const selectedAge = document.querySelector('input[name="age"]:checked').value;
       
-      // Store age preference for the background script to use
-      await chrome.storage.sync.set({ preferredAge: selectedAge });
+      // Store age preference for the background script to use (use defaultAge to match options)
+      await chrome.storage.sync.set({ defaultAge: selectedAge });
 
       const result = await chrome.runtime.sendMessage({
         action: 'summarizeVideo',
@@ -243,9 +243,9 @@ Need help? Check the extension options for more settings!
 
   async loadUserPreferences() {
     try {
-      const result = await chrome.storage.sync.get(['preferredAge']);
-      if (result.preferredAge) {
-        const radio = document.querySelector(`input[name="age"][value="${result.preferredAge}"]`);
+      const result = await chrome.storage.sync.get(['defaultAge']);
+      if (result.defaultAge) {
+        const radio = document.querySelector(`input[name="age"][value="${result.defaultAge}"]`);
         if (radio) {
           radio.checked = true;
         }
@@ -258,7 +258,7 @@ Need help? Check the extension options for more settings!
   async saveUserPreferences() {
     try {
       const selectedAge = document.querySelector('input[name="age"]:checked').value;
-      await chrome.storage.sync.set({ preferredAge: selectedAge });
+      await chrome.storage.sync.set({ defaultAge: selectedAge });
     } catch (error) {
       console.error('Error saving preferences:', error);
     }
