@@ -18,15 +18,17 @@ This Chrome Extension creates child-friendly summaries of YouTube videos, making
 
 - 🎯 **Two-Phase Summarization**: Quick initial summaries followed by detailed analysis
 - ❓ **Interactive Q&A**: Generates engaging question-answer pairs for each topic
-- 📥 **Download Summaries**: Save beautiful HTML files with complete summaries
+- 📥 **Download Summaries**: Save beautiful HTML files with complete summaries and proper video links
 - 🔄 **Collapsible Sections**: Interactive expandable content for better organization
 - 🎨 **Beautiful Design**: Colorful, engaging interface designed specifically for children
 - 🔧 **Age Customization**: Adjustable content complexity for different age groups (3-5, 6-8, 9-12 years)
-- 📝 **Rich Text Formatting**: Proper bullet points, bold text, and structured content
+- 📝 **Rich Text Formatting**: Proper bullet points, bold text, and structured content in summaries and downloads
 - 🌙 **Dark Mode Support**: Automatic adaptation to YouTube's dark theme
 - ♿ **Accessibility Features**: High contrast, responsive design, and keyboard navigation
 - 🚀 **Manifest V3**: Modern, secure Chrome Extension architecture
 - 🤖 **AI-Powered**: Uses Google's Gemini 2.0 Flash for intelligent content processing
+- 🎛️ **Auto-Save Settings**: Settings automatically save as you change them (no manual save required)
+- 👁️ **Smart Auto-Detect**: Configurable auto-detection of new videos with instant on/off toggle
 
 ## 🏗️ Architecture
 
@@ -50,7 +52,7 @@ flowchart TD
     subgraph detailed[Detailed Phase - On Demand]
         display1 -->|User Requests Detailed| map[Map Phase - Batch Processing]
         map --> topic1[Process Topic 1]
-        map --> topic2[Process Topic 2] 
+        map --> topic2[Process Topic 2]
         map --> topic3[Process Topic 3]
         map --> topicN[Process Topic N]
         
@@ -111,8 +113,9 @@ Following PocketFlow's node-based architecture with two-phase processing:
 4. **Configure API Key**:
    - Click the extension icon in Chrome toolbar
    - Click "Settings" or right-click extension → "Options"
-   - Enter your Gemini API key
-   - Save settings
+   - Enter your Gemini API key (auto-saves as you type)
+   - Test API key with built-in validator
+   - Adjust other settings as needed (all auto-save)
 
 ### Production Installation
 
@@ -158,11 +161,24 @@ Following PocketFlow's node-based architecture with two-phase processing:
 - **Rich Formatting**: Bullet points, bold text, and structured content
 - **Dark Mode**: Automatic adaptation to YouTube's theme
 
+#### Smart Auto-Detection
+- **Auto-detect Videos**: Automatically shows summary button when you navigate to new videos
+- **Instant Toggle**: Enable/disable auto-detection from extension settings
+- **Real-time Updates**: Settings changes apply immediately without page refresh
+- **Popup Access**: Always access summaries through extension popup, even with auto-detect disabled
+
 #### Download Options
 - **Quick Summary**: Lightweight HTML with main topics
 - **Detailed Summary**: Complete interactive HTML with all content
-- **Formatted Output**: Professional styling with proper typography
+- **Proper Video Links**: Downloaded files link back to original YouTube video (not local file)
+- **Rich Text Formatting**: Downloaded summaries include bullet points, bold text, and proper structure
 - **Print-Ready**: Optimized for printing and sharing
+
+#### Modern Settings Experience
+- **Auto-Save**: Settings automatically save as you change them (no manual save button needed)
+- **Real-time Feedback**: See "Auto-saving..." and "Saved" notifications
+- **Smart Validation**: API key testing and validation built-in
+- **Import/Export**: Backup and restore your settings
 
 #### Age Customization
 - **3-5 years**: Very simple words and basic concepts
@@ -181,9 +197,9 @@ Following PocketFlow's node-based architecture with two-phase processing:
 
 2. **Configure Extension**:
    - Open extension options page
-   - Paste API key in the designated field
+   - Paste API key in the designated field (auto-saves)
    - Test the connection with built-in validator
-   - Save settings
+   - Adjust summary settings (auto-save enabled)
 
 ### Settings Options
 
@@ -191,9 +207,12 @@ Following PocketFlow's node-based architecture with two-phase processing:
 |---------|-------------|---------|---------|
 | Default Age Group | Target age for content adaptation | 6-8 years | ✅ Implemented |
 | API Key | Gemini 2.0 Flash API authentication | None | ✅ Implemented |
-| Summary Mode | Quick vs Detailed analysis preference | Both available | ✅ Implemented |
+| Summary Length | Controls how detailed summaries are (short/medium/long) | Medium | ✅ Implemented |
+| Max Topics | Number of main topics to identify per video | 5 topics | ✅ Implemented |
+| Auto-detect Videos | Automatically show summary button on new videos | Enabled | ✅ Implemented |
+| Auto-Save Settings | Settings save automatically as you change them | Always On | ✅ Implemented |
 | Content Safety | Child-safe filtering level | Strict | ✅ Implemented |
-| Download Format | HTML export styling | Professional | ✅ Implemented |
+| Download Format | HTML export with proper video links and formatting | Professional | ✅ Implemented |
 | Display Theme | Light/Dark mode preference | Auto (follows YouTube) | ✅ Implemented |
 
 ### Advanced Configuration
@@ -242,15 +261,17 @@ youtube-summarizer-extension/
 
 #### `background.js` - Core Logic
 - **SummaryGenerator**: Handles Gemini API communication
-- **SummaryDownloadManager**: Creates formatted HTML downloads
+- **SummaryDownloadManager**: Creates formatted HTML downloads with proper video links
 - **Two-phase processing**: Quick summaries + detailed analysis
-- **Text formatting**: Converts plain text to rich HTML content
+- **Text formatting**: Converts plain text to rich HTML with bullet points and bold text
+- **URL handling**: Ensures downloaded files link to YouTube videos, not local files
 
 #### `content.js` - YouTube Integration  
 - **Video detection**: Automatic button injection on YouTube pages
-- **Navigation handling**: SPA navigation with `observeVideoChanges()`
+- **Smart auto-detection**: Configurable auto-show summary button with real-time settings sync
+- **Navigation handling**: SPA navigation with `observeVideoChanges()` and proper cleanup
 - **Summary display**: Interactive panels with collapsible sections
-- **User interface**: Age selection and summary controls
+- **Settings integration**: Real-time response to auto-detect setting changes
 
 #### `content.css` - Styling System
 - **Dark mode support**: Automatic theme adaptation
@@ -474,8 +495,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **PocketFlow Framework**: Inspiration for the architectural design patterns
-- **Original Project**: Based on [YoutubeSummarizerKids](https://github.com/adityasoni99/YoutubeSummarizerKids)
 - **Google Gemini**: AI capabilities for content processing
 - **Chrome Extensions Team**: Excellent documentation and tools
 - **Open Source Community**: Libraries and resources that made this possible
