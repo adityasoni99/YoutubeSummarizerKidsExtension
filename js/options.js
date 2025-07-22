@@ -12,7 +12,7 @@ class OptionsController {
       // summaryLanguage: 'en',
       maxTopics: 5,
       summaryLength: 'medium',
-      autoSummarize: true
+      autoSummarize: true  // Auto-detect new videos by default
     };
     
     this.init();

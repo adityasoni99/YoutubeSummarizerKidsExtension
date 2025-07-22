@@ -10,7 +10,7 @@ class YouTubeContentScript {
     this.maxRetries = 3;
     this.debugMode = true; // Enable for troubleshooting
   }
-
+  
   init() {
     this.log('Initializing YouTube Content Script');
     
@@ -18,16 +18,19 @@ class YouTubeContentScript {
     this.currentVideoId = this.extractVideoId(window.location.href);
     
     this.setupMessageListener();
-    // Wait for page to load before adding button
+    this.setupStorageListener(); // Listen for setting changes
+    // Wait for page to load before adding button (respect auto-detect setting)
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => this.addSummaryButton());
+      document.addEventListener('DOMContentLoaded', () => {
+        this.checkAutoDetectSetting(() => this.addSummaryButton());
+      });
     } else {
-      setTimeout(() => this.addSummaryButton(), 2000);
+      this.checkAutoDetectSetting(() => {
+        setTimeout(() => this.addSummaryButton(), 2000);
+      });
     }
     this.observeVideoChanges();
-  }
-
-  log(message, data = null) {
+  }  log(message, data = null) {
     if (this.debugMode) {
       console.log(`[YT-Summarizer] ${message}`, data || '');
     }
@@ -56,6 +59,26 @@ class YouTubeContentScript {
     });
   }
 
+  setupStorageListener() {
+    // Listen for changes to storage (when settings are updated)
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace === 'sync' && changes.autoSummarize) {
+        const newValue = changes.autoSummarize.newValue;
+        this.log('Auto-detect setting changed to:', newValue);
+        
+        if (!newValue) {
+          // Auto-detect was disabled, remove all existing buttons thoroughly
+          this.removeAllSummaryButtons();
+        } else {
+          // Auto-detect was enabled, add button if on a video page
+          if (this.currentVideoId) {
+            setTimeout(() => this.addSummaryButton(), 1000);
+          }
+        }
+      }
+    });
+  }
+
   observeVideoChanges() {
     this.log('Setting up video change observation');
     
@@ -78,8 +101,10 @@ class YouTubeContentScript {
             this.summaryPanel = null;
           }
           
-          // Re-add summary button for new video
-          setTimeout(() => this.addSummaryButton(), 2000);
+          // Check if auto-detect is enabled before adding button for new video
+          this.checkAutoDetectSetting(() => {
+            setTimeout(() => this.addSummaryButton(), 2000);
+          });
         }
       }
     });
@@ -137,8 +162,53 @@ class YouTubeContentScript {
       this.summaryPanel = null;
     }
     
-    // Re-add summary button for new video
-    setTimeout(() => this.addSummaryButton(), 2000);
+    // Check if auto-detect is enabled before adding button
+    this.checkAutoDetectSetting(() => {
+      // Re-add summary button for new video if auto-detect is enabled
+      setTimeout(() => this.addSummaryButton(), 2000);
+    });
+  }
+
+  // Check auto-detect setting from storage
+  async checkAutoDetectSetting(callback) {
+    try {
+      const result = await chrome.storage.sync.get(['autoSummarize']);
+      const autoDetectEnabled = result.autoSummarize !== undefined ? result.autoSummarize : true; // Default to true
+      
+      this.log('Auto-detect setting:', autoDetectEnabled);
+      
+      if (autoDetectEnabled) {
+        callback();
+      } else {
+        this.log('Auto-detect disabled, removing any existing summary button');
+        // Remove existing button if auto-detect is disabled - be more thorough
+        this.removeAllSummaryButtons();
+      }
+    } catch (error) {
+      this.log('Error checking auto-detect setting, defaulting to enabled:', error.message);
+      callback(); // Default to enabled if there's an error
+    }
+  }
+
+  // Helper method to remove all summary buttons thoroughly
+  removeAllSummaryButtons() {
+    try {
+      // Remove by ID
+      const existingButton = document.getElementById('yt-summarizer-btn');
+      if (existingButton) {
+        existingButton.remove();
+        this.log('Removed existing summary button by ID');
+      }
+      
+      // Remove by class name (in case there are orphaned buttons)
+      const buttonsByClass = document.querySelectorAll('.yt-summarizer-button');
+      buttonsByClass.forEach(button => {
+        button.remove();
+        this.log('Removed orphaned summary button by class');
+      });
+    } catch (error) {
+      this.log('Error removing summary buttons:', error.message);
+    }
   }
 
   // Improved video information extraction with multiple fallback methods
@@ -472,11 +542,8 @@ class YouTubeContentScript {
   }
 
   addSummaryButton() {
-    // Remove existing button if present
-    const existingButton = document.getElementById('yt-summarizer-btn');
-    if (existingButton) {
-      existingButton.remove();
-    }
+    // Remove existing buttons thoroughly before adding new one
+    this.removeAllSummaryButtons();
 
     this.log('Adding summary button...');
 
