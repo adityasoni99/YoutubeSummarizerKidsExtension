@@ -55,11 +55,6 @@ class OptionsController {
   }
 
   setupEventListeners() {
-    // Save settings button
-    document.getElementById('save-settings').addEventListener('click', () => {
-      this.saveSettings();
-    });
-
     // Reset settings button
     document.getElementById('reset-settings').addEventListener('click', () => {
       this.resetSettings();
@@ -101,10 +96,14 @@ class OptionsController {
     const inputs = document.querySelectorAll('input, select');
     inputs.forEach(input => {
       input.addEventListener('change', () => {
+        // Show saving indicator
+        this.showStatus('💾 Auto-saving...', 'info', 500);
+        
         // Debounced auto-save
         clearTimeout(this.autoSaveTimeout);
-        this.autoSaveTimeout = setTimeout(() => {
-          this.saveSettings(true); // Silent save
+        this.autoSaveTimeout = setTimeout(async () => {
+          await this.saveSettings(true); // Silent save
+          this.showStatus('✅ Saved', 'success', 1500);
         }, 1000);
       });
     });
@@ -300,15 +299,18 @@ class OptionsController {
     // document.body.classList.toggle('high-contrast', settings.highContrast);
   }
 
-  showStatus(message, type) {
+  showStatus(message, type, duration = 3000) {
     const statusDiv = document.getElementById('save-status');
     statusDiv.textContent = message;
     statusDiv.className = `status-message ${type}`;
     statusDiv.classList.remove('hidden');
     
-    setTimeout(() => {
+    // Clear any existing timeout
+    clearTimeout(this.statusTimeout);
+    
+    this.statusTimeout = setTimeout(() => {
       statusDiv.classList.add('hidden');
-    }, 3000);
+    }, duration);
   }
 }
 

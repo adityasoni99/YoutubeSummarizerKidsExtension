@@ -416,9 +416,17 @@ body {
 /* Actions */
 .actions {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: var(--spacing-md);
-  justify-content: center;
   margin: var(--spacing-xl) 0;
+}
+
+.auto-save-info {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+  font-style: italic;
 }
 
 /* Test Result */
@@ -474,6 +482,14 @@ body {
 .status-message.error {
   background: var(--error-color);
   color: var(--text-white);
+}
+
+.status-message.info {
+  background: var(--secondary-color);
+  color: var(--text-white);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  opacity: 0.9;
 }
 
 /* Footer */
