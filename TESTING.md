@@ -1,6 +1,40 @@
 # 🧪 Testing Guide - YouTube Summarizer for Kids Chrome Extension
 
-## 🚀 Quick Testing Steps
+## ✅ Automated Testing Framework - 29 Passing Tests
+
+This project includes a comprehensive automated testing framework with **29 passing tests**:
+
+### Test Results Summary
+```
+Test Suites: 5 passed, 5 total
+Tests:       29 passed, 29 total
+Snapshots:   0 total
+Time:        1.19 s
+```
+
+### Running Automated Tests
+```bash
+# Run all tests
+npm test
+
+# Run by category
+npm run test:unit        # 20 unit tests
+npm run test:integration # 3 integration tests  
+npm run test:e2e         # 6 end-to-end tests
+
+# Development mode
+npm run test:watch       # Watch for changes
+npm run test:coverage    # Generate coverage report
+```
+
+### Test Categories
+- **Unit Tests** (`tests/unit/`) - 20 tests covering core functionality
+- **Integration Tests** (`tests/integration/`) - 3 tests for API integration  
+- **E2E Tests** (`tests/e2e/`) - 6 tests for browser automation
+
+---
+
+## 🚀 Manual Testing Steps
 
 ### 1. Install the Extension
 ```bash
