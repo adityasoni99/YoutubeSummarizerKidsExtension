@@ -11,7 +11,7 @@ The YouTube Video Summarizer for Kids is implemented as a Chrome extension with 
 
 ### Extension Components
 
-1. **Background Service Worker** (`background.js`): 
+1. **Background Service Worker** (`background.js`):
    - Implements the main summarization workflow
    - Handles communication between components
    - Processes API calls to Gemini
@@ -21,7 +21,7 @@ The YouTube Video Summarizer for Kids is implemented as a Chrome extension with 
    - Injects and manages UI elements on YouTube pages
    - Observes navigation between videos
 
-3. **Popup & Options** (`popup.js`, `options.js`): 
+3. **Popup & Options** (`popup.js`, `options.js`):
    - User interfaces for quick actions and configuration
    - API key management
    - Settings control
@@ -57,40 +57,40 @@ The YouTube Video Summarizer follows a **Workflow** design pattern with elements
 ### Phase 1: Initial Summarization
 
 1. **ValidateURL Node**
-   - *Purpose*: Validates that the input is a proper YouTube URL
-   - *Type*: Regular
-   - *Implementation*: Uses a regex pattern to validate the URL and extract the video ID
-   - *Steps*:
+   - _Purpose_: Validates that the input is a proper YouTube URL
+   - _Type_: Regular
+   - _Implementation_: Uses a regex pattern to validate the URL and extract the video ID
+   - _Steps_:
      - Read URL from the request
      - Validate with regex pattern for YouTube watch URLs
      - Extract and store the video ID
      - Return validation result
 
 2. **GetTranscript Node**
-   - *Purpose*: Retrieves the transcript and metadata for the YouTube video
-   - *Type*: Async (communicates with content script)
-   - *Implementation*: Sends message to content script to extract information from the webpage
-   - *Steps*:
+   - _Purpose_: Retrieves the transcript and metadata for the YouTube video
+   - _Type_: Async (communicates with content script)
+   - _Implementation_: Sends message to content script to extract information from the webpage
+   - _Steps_:
      - Send message to content script requesting video information
      - Implement retry logic for reliable extraction
      - Validate received transcript content
      - Store transcript and video metadata
 
 3. **GenerateTopics Node**
-   - *Purpose*: Identifies main topics and creates an initial summary
-   - *Type*: Regular (calls external API)
-   - *Implementation*: Uses Gemini API to analyze transcript and identify topics
-   - *Steps*:
+   - _Purpose_: Identifies main topics and creates an initial summary
+   - _Type_: Regular (calls external API)
+   - _Implementation_: Uses Gemini API to analyze transcript and identify topics
+   - _Steps_:
      - Prepare prompt with video title and transcript
      - Call Gemini API to identify topics and generate initial summary
      - Parse and validate the response
      - Store topics and initial summary
 
 4. **ReturnInitialResults Node**
-   - *Purpose*: Returns the initial phase results to the user interface
-   - *Type*: Regular
-   - *Implementation*: Formats data for the content script to display
-   - *Steps*:
+   - _Purpose_: Returns the initial phase results to the user interface
+   - _Type_: Regular
+   - _Implementation_: Formats data for the content script to display
+   - _Steps_:
      - Collect video info, topics, and initial summary
      - Format response with processing state marked as "initial"
      - Return data to content script for display
@@ -98,39 +98,39 @@ The YouTube Video Summarizer follows a **Workflow** design pattern with elements
 ### Phase 2: Detailed Summarization (On-Demand)
 
 5. **ProcessTopics Node** (Map Phase)
-   - *Purpose*: Processes each topic in-depth with explanations and Q&A
-   - *Type*: BatchNode (conceptually processes each topic independently)
-   - *Implementation*: Uses Gemini API to create detailed content for each topic
-   - *Steps*:
+   - _Purpose_: Processes each topic in-depth with explanations and Q&A
+   - _Type_: BatchNode (conceptually processes each topic independently)
+   - _Implementation_: Uses Gemini API to create detailed content for each topic
+   - _Steps_:
      - For each topic, generate a comprehensive prompt
      - Call Gemini API to generate Q&A pairs and explanations
      - Parse and structure the responses
      - Store processed topics with all details
 
 6. **CombineTopics Node** (Reduce Phase)
-   - *Purpose*: Creates connections between topics and ensures consistency
-   - *Type*: Regular
-   - *Implementation*: Uses Gemini API to find relationships between topics
-   - *Steps*:
+   - _Purpose_: Creates connections between topics and ensures consistency
+   - _Type_: Regular
+   - _Implementation_: Uses Gemini API to find relationships between topics
+   - _Steps_:
      - Prepare prompt with all processed topics
      - Call Gemini API to generate connections and relationships
      - Parse response to extract connection statements
      - Store topic connections and ranking
 
 7. **CreateDetailedSummary Node**
-   - *Purpose*: Creates a comprehensive summary of the entire video
-   - *Type*: Regular
-   - *Implementation*: Uses Gemini API or composes from existing content
-   - *Steps*:
+   - _Purpose_: Creates a comprehensive summary of the entire video
+   - _Type_: Regular
+   - _Implementation_: Uses Gemini API or composes from existing content
+   - _Steps_:
      - Generate prompt with all available information
      - Call Gemini API to create cohesive summary
      - Store detailed summary
 
 8. **ReturnDetailedResults Node**
-   - *Purpose*: Returns the complete detailed results to the user interface
-   - *Type*: Regular
-   - *Implementation*: Formats all processed data for the content script
-   - *Steps*:
+   - _Purpose_: Returns the complete detailed results to the user interface
+   - _Type_: Regular
+   - _Implementation_: Formats all processed data for the content script
+   - _Steps_:
      - Collect all detailed information (processed topics, connections, etc.)
      - Format response with processing state marked as "completed"
      - Return data to content script for display
@@ -141,11 +141,11 @@ The YouTube Video Summarizer follows a **Workflow** design pattern with elements
 
 The shared store will contain:
 
-```python
+````python
 shared = {
     # Input
     "youtube_url": "https://www.youtube.com/watch?v=...",
-    
+
     # Transcript data
     "transcript": "Full text of the video transcript...",
     "video_info": {
@@ -153,7 +153,7 @@ shared = {
         "duration": 600,  # in seconds
         "thumbnail_url": "https://..."
     },
-    
+
     # Map phase - Extracted topics
     "topics": [
         {
@@ -163,7 +163,7 @@ shared = {
         },
         # More topics...
     ],
-    
+
     # Reduce phase - Processed topics with Q&A and explanations
     "processed_topics": [
         {
@@ -180,12 +180,12 @@ shared = {
         },
         # More processed topics...
     ],
-    
+
     # Output
     "summary": "Overall child-friendly summary of the video...",
     "html_content": "<!DOCTYPE html>...",
     "output_path": "/path/to/output.html",
-    
+
     # Error handling
     "error": "Error message if something goes wrong"
 }
@@ -213,16 +213,16 @@ flowchart TD
     button --> validate[Validate URL]
     validate -->|Invalid| error[Show Error]
     validate -->|Valid| transcript[Get Transcript]
-    
+
     transcript --> topics[Generate Topics]
     topics --> initial[Initial Summary]
-    
+
     initial --> display1[Display Initial Results]
     display1 --> user[User Views Initial Summary]
-    
+
     user --> detail[Click "View Detailed Summary"]
     detail --> map[Process Topics in Detail]
-    
+
     subgraph "Phase 1: Initial Summary"
         validate
         transcript
@@ -230,16 +230,16 @@ flowchart TD
         initial
         display1
     end
-    
+
     subgraph "Phase 2: Detailed Summary (On-Demand)"
         detail
         map --> combine[Create Topic Connections]
         combine --> summary[Create Detailed Summary]
         summary --> display2[Display Detailed Results]
     end
-    
+
     display2 --> end[User Explores Detailed Content]
-```
+````
 
 This two-phase approach provides several advantages:
 
@@ -266,12 +266,12 @@ The YouTube Summarizer implements a two-phase processing approach that balances 
 
 The initial phase focuses on quickly providing useful information to the user:
 
-1. **Content**: 
+1. **Content**:
    - Brief overall summary of the video
    - List of main topics with short descriptions
    - No detailed explanations or Q&A content
 
-2. **Implementation**: 
+2. **Implementation**:
    - Single LLM call to identify topics and generate summary
    - Minimal processing to ensure quick response
    - Results displayed immediately after processing
@@ -321,43 +321,44 @@ The detailed phase is triggered only when requested by the user:
 ## Utility Functions
 
 > Notes for AI:
+>
 > 1. Understand the utility function definition thoroughly by reviewing the doc.
 > 2. Include only the necessary utility functions, based on nodes in the flow.
 
 1. **Call LLM** (`utils/call_llm.py`)
-   - *Input*: prompt (str)
-   - *Output*: response (str)
-   - *Necessity*: Used by most nodes for generating summaries, topics, and Q&A
+   - _Input_: prompt (str)
+   - _Output_: response (str)
+   - _Necessity_: Used by most nodes for generating summaries, topics, and Q&A
 
 2. **YouTube Transcript** (`utils/get_transcript.py`)
-   - *Input*: youtube_url (str)
-   - *Output*: transcript_info (dict) containing:
+   - _Input_: youtube_url (str)
+   - _Output_: transcript_info (dict) containing:
      - transcript (str): Full transcript text
      - title (str): Video title
      - duration (int): Video duration in seconds
      - thumbnail_url (str): URL to video thumbnail
-   - *Necessity*: Used to directly get the transcript of a YouTube video without audio processing
+   - _Necessity_: Used to directly get the transcript of a YouTube video without audio processing
 
 3. **HTML Generator** (`utils/generate_html.py`)
-   - *Input*: 
+   - _Input_:
      - title (str)
      - topics (list of dict)
      - summary (str)
      - thumbnail_url (str)
-   - *Output*: html_content (str)
-   - *Necessity*: Used to create the HTML visualization content
+   - _Output_: html_content (str)
+   - _Necessity_: Used to create the HTML visualization content
 
 4. **HTML Saver** (`utils/save_html.py`)
-   - *Input*:
+   - _Input_:
      - html_content (str)
      - filename (str)
-   - *Output*: file_path (str): Path where the HTML file was saved
-   - *Necessity*: Used to save the generated HTML content to a file
+   - _Output_: file_path (str): Path where the HTML file was saved
+   - _Necessity_: Used to save the generated HTML content to a file
 
 5. **URL Validator** (`utils/validate_url.py`)
-   - *Input*: url (str)
-   - *Output*: is_valid (bool), error_message (str) if invalid
-   - *Necessity*: Used to validate YouTube URLs before processing
+   - _Input_: url (str)
+   - _Output_: is_valid (bool), error_message (str) if invalid
+   - _Necessity_: Used to validate YouTube URLs before processing
 
 ## Node Design
 
@@ -369,55 +370,55 @@ The shared store structure is organized as follows:
 
 ```javascript
 shared = {
-    // Input data
-    "videoId": "dQw4w9WgXcQ",
-    "youtubeUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    
-    // Video metadata
-    "videoInfo": {
-        "title": "Video Title",
-        "duration": 600,  // in seconds
-        "thumbnailUrl": "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+  // Input data
+  videoId: "dQw4w9WgXcQ",
+  youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+
+  // Video metadata
+  videoInfo: {
+    title: "Video Title",
+    duration: 600, // in seconds
+    thumbnailUrl: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+  },
+
+  // Extracted content
+  transcript: "Full text of the video transcript...",
+
+  // Phase 1: Initial processing results
+  topics: [
+    {
+      id: 1,
+      name: "Topic Name",
+      content: "Brief description of what this topic covers",
     },
-    
-    // Extracted content
-    "transcript": "Full text of the video transcript...",
-    
-    // Phase 1: Initial processing results
-    "topics": [
-        {
-            "id": 1,
-            "name": "Topic Name",
-            "content": "Brief description of what this topic covers"
-        },
-        // More topics...
-    ],
-    "initialSummary": "Short kid-friendly summary of the whole video",
-    
-    // Phase 2: Detailed processing results
-    "processedTopics": [
-        {
-            "id": 1,
-            "name": "Topic Name",
-            "content": "Brief description...",
-            "summary": "Kid-friendly summary of this topic",
-            "explanation": "Detailed but simple explanation of the concept",
-            "qaPairs": [
-                {"question": "Question 1?", "answer": "Simple answer 1"},
-                {"question": "Question 2?", "answer": "Simple answer 2"},
-                // More Q&A pairs...
-            ]
-        },
-        // More processed topics...
-    ],
-    "topicConnections": [
-        "Topic 1 connects to Topic 2 because...",
-        "Topics 3 and 4 are related through...",
-        // More connections...
-    ],
-    "topicRanking": [2, 1, 3, 4],  // Topics ordered by importance
-    "detailedSummary": "Comprehensive kid-friendly summary of the entire video"
-}
+    // More topics...
+  ],
+  initialSummary: "Short kid-friendly summary of the whole video",
+
+  // Phase 2: Detailed processing results
+  processedTopics: [
+    {
+      id: 1,
+      name: "Topic Name",
+      content: "Brief description...",
+      summary: "Kid-friendly summary of this topic",
+      explanation: "Detailed but simple explanation of the concept",
+      qaPairs: [
+        { question: "Question 1?", answer: "Simple answer 1" },
+        { question: "Question 2?", answer: "Simple answer 2" },
+        // More Q&A pairs...
+      ],
+    },
+    // More processed topics...
+  ],
+  topicConnections: [
+    "Topic 1 connects to Topic 2 because...",
+    "Topics 3 and 4 are related through...",
+    // More connections...
+  ],
+  topicRanking: [2, 1, 3, 4], // Topics ordered by importance
+  detailedSummary: "Comprehensive kid-friendly summary of the entire video",
+};
 ```
 
 ### Node Steps
@@ -425,19 +426,21 @@ shared = {
 > Notes for AI: Carefully decide whether to use Batch/Async Node/Flow.
 
 1. First Node
-  - *Purpose*: Provide a short explanation of the node’s function
-  - *Type*: Decide between Regular, Batch, or Async
-  - *Steps*:
-    - *prep*: Read "key" from the shared store
-    - *exec*: Call the utility function
-    - *post*: Write "key" to the shared store
+
+- _Purpose_: Provide a short explanation of the node’s function
+- _Type_: Decide between Regular, Batch, or Async
+- _Steps_:
+  - _prep_: Read "key" from the shared store
+  - _exec_: Call the utility function
+  - _post_: Write "key" to the shared store
 
 2. Second Node
-  ...
+   ...
 
 ## Flow Design
 
 > Notes for AI:
+>
 > 1. Consider the design patterns of agent, map-reduce, rag, and workflow. Apply them if they fit.
 > 2. Present a concise, high-level description of the workflow.
 
@@ -453,26 +456,26 @@ flowchart TD
     start[Input: YouTube URL] --> validate[Validate URL]
     validate -->|Valid| transcript[Get Transcript]
     validate -->|Invalid| error[Show Error]
-    
+
     transcript --> topics[Generate Initial Topics]
     topics --> display1[Display Initial Summary]
-    
+
     display1 --> request[User Requests Detailed Summary]
-    
+
     subgraph map[Map Phase]
         request --> processTopics[Process Each Topic]
         processTopics --> topic1[Process Topic 1]
         processTopics --> topic2[Process Topic 2]
         processTopics --> topic3[Process Topic 3]
     end
-    
+
     subgraph reduce[Reduce Phase]
         topic1 --> combine[Create Connections]
         topic2 --> combine
         topic3 --> combine
         combine --> detailed[Build Detailed Summary]
     end
-    
+
     detailed --> display2[Display Detailed Summary]
     display2 --> interact[User Explores Content]
 ```
@@ -485,6 +488,7 @@ This improved Map-Reduce implementation:
 4. **Presents results in a progressive manner** with collapsible sections
 
 This design allows us to:
+
 - Process each topic independently
 - Scale efficiently with the number of topics
 - Maintain a consistent structure for all topic summaries and Q&A pairs
@@ -526,6 +530,7 @@ The Map Reduce pattern is implemented as follows:
 4. **Fault Tolerance**: If processing one topic fails, others can still succeed
 
 This pattern is particularly well-suited for our use case because:
+
 - Topics are naturally independent units
 - Each topic requires significant LLM processing
 - The final output needs to maintain a consistent style and complexity level
@@ -600,4 +605,3 @@ The popup provides quick access to extension features:
    - Shows if API key is configured
    - Provides feedback on current state
    - Links to troubleshooting resources
-

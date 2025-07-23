@@ -9,7 +9,7 @@
   --yt-summarizer-success: #7ed321;
   --yt-summarizer-warning: #f5a623;
   --yt-summarizer-error: #d0021b;
-  
+
   /* Background colors */
   --yt-summarizer-bg-primary: #f9f9f9;
   --yt-summarizer-bg-secondary: #ffffff;
@@ -17,22 +17,23 @@
   --yt-summarizer-bg-light: #e8f4f8;
   --yt-summarizer-bg-success: #e8f5e8;
   --yt-summarizer-bg-error: #ffeaea;
-  
+
   /* Text colors */
   --yt-summarizer-text-primary: #333333;
   --yt-summarizer-text-secondary: #666666;
   --yt-summarizer-text-light: #999999;
   --yt-summarizer-text-white: #ffffff;
-  
+
   /* Borders and shadows */
   --yt-summarizer-border-radius: 10px;
   --yt-summarizer-border-radius-small: 6px;
   --yt-summarizer-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
   --yt-summarizer-shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
   --yt-summarizer-shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.2);
-  
+
   /* Typography */
-  --yt-summarizer-font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', sans-serif;
+  --yt-summarizer-font-family:
+    "Comic Sans MS", "Chalkboard SE", "Segoe UI", sans-serif;
   --yt-summarizer-font-size-small: 12px;
   --yt-summarizer-font-size-base: 14px;
   --yt-summarizer-font-size-medium: 16px;
@@ -47,7 +48,11 @@
   gap: 8px;
   padding: 10px 16px;
   margin: 8px;
-  background: linear-gradient(135deg, var(--yt-summarizer-primary), var(--yt-summarizer-accent));
+  background: linear-gradient(
+    135deg,
+    var(--yt-summarizer-primary),
+    var(--yt-summarizer-accent)
+  );
   color: var(--yt-summarizer-text-white);
   border: none;
   border-radius: var(--yt-summarizer-border-radius-small);
@@ -86,7 +91,11 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, var(--yt-summarizer-secondary), var(--yt-summarizer-success));
+  background: linear-gradient(
+    135deg,
+    var(--yt-summarizer-secondary),
+    var(--yt-summarizer-success)
+  );
   color: var(--yt-summarizer-text-white);
   border: none;
   border-radius: var(--yt-summarizer-border-radius-small);
@@ -124,7 +133,11 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, var(--yt-summarizer-warning), var(--yt-summarizer-accent));
+  background: linear-gradient(
+    135deg,
+    var(--yt-summarizer-warning),
+    var(--yt-summarizer-accent)
+  );
   color: var(--yt-summarizer-text-white);
   border: none;
   border-radius: var(--yt-summarizer-border-radius-small);
@@ -151,7 +164,8 @@
   font-size: 1.2em;
 }
 
-.detailed-info, .download-info {
+.detailed-info,
+.download-info {
   margin-top: 10px;
   font-size: var(--yt-summarizer-font-size-small);
   color: var(--yt-summarizer-text-secondary);
@@ -183,7 +197,11 @@
 
 /* Panel Header */
 .panel-header {
-  background: linear-gradient(135deg, var(--yt-summarizer-secondary), var(--yt-summarizer-primary));
+  background: linear-gradient(
+    135deg,
+    var(--yt-summarizer-secondary),
+    var(--yt-summarizer-primary)
+  );
   color: var(--yt-summarizer-text-white);
   padding: 20px;
   position: relative;
@@ -346,7 +364,11 @@
 }
 
 .topic h3 {
-  background: linear-gradient(135deg, var(--yt-summarizer-secondary), var(--yt-summarizer-primary));
+  background: linear-gradient(
+    135deg,
+    var(--yt-summarizer-secondary),
+    var(--yt-summarizer-primary)
+  );
   color: var(--yt-summarizer-text-white);
   padding: 16px 20px;
   margin: 0;
@@ -400,7 +422,7 @@
   margin-top: 16px;
 }
 
-.explanation-header strong, 
+.explanation-header strong,
 .qa-section-header h4 {
   display: flex;
   align-items: center;
@@ -436,7 +458,11 @@
 .qa-content {
   max-height: 1000px;
   overflow: hidden;
-  transition: max-height 0.5s ease, opacity 0.5s ease, margin 0.3s ease, padding 0.3s ease;
+  transition:
+    max-height 0.5s ease,
+    opacity 0.5s ease,
+    margin 0.3s ease,
+    padding 0.3s ease;
   opacity: 1;
   margin-top: 16px;
   padding: 0 16px 16px 16px;
@@ -534,7 +560,10 @@
 .qa-content {
   max-height: 1000px;
   overflow: hidden;
-  transition: max-height 0.5s ease, opacity 0.5s ease, margin 0.3s ease;
+  transition:
+    max-height 0.5s ease,
+    opacity 0.5s ease,
+    margin 0.3s ease;
   opacity: 1;
   margin-top: 16px;
 }
@@ -639,9 +668,15 @@
 
 /* Highlight effect for newly created panel */
 @keyframes highlight-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(126, 211, 33, 0.7); }
-  70% { box-shadow: 0 0 0 15px rgba(126, 211, 33, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(126, 211, 33, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(126, 211, 33, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(126, 211, 33, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(126, 211, 33, 0);
+  }
 }
 
 .highlight-panel {
@@ -654,7 +689,7 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 3px solid rgba(255,255,255,0.3);
+  border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: var(--yt-summarizer-text-white);
   animation: spin 1s ease-in-out infinite;
@@ -662,7 +697,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive Design */
@@ -671,28 +708,28 @@
     margin: 16px 0;
     border-radius: var(--yt-summarizer-border-radius-small);
   }
-  
+
   .panel-content {
     padding: 16px;
   }
-  
+
   .panel-header {
     padding: 16px;
     flex-direction: column;
     gap: 12px;
     text-align: center;
   }
-  
+
   .close-btn {
     position: absolute;
     top: 12px;
     right: 12px;
   }
-  
+
   .video-info .thumbnail {
     max-width: 150px;
   }
-  
+
   .summary,
   .connections,
   .topic-summary,
@@ -701,27 +738,27 @@
   .explanation-section {
     padding: 12px 16px;
   }
-  
+
   .topic h3 {
     padding: 12px 16px;
     font-size: var(--yt-summarizer-font-size-base);
   }
-  
+
   .qa-section,
   .explanation-section {
     padding: 12px;
   }
-  
+
   .qa-section-header,
   .explanation-header {
     padding: 10px;
   }
-  
+
   .qa-content,
   .explanation-content {
     margin-top: 12px;
   }
-  
+
   .qa {
     padding: 12px;
     margin-bottom: 8px;
@@ -736,48 +773,48 @@
     color: #f5f5f5;
     border-color: var(--yt-summarizer-secondary);
   }
-  
+
   /* Section backgrounds with better contrast */
   .summary {
     background: #303030;
     border-color: var(--yt-summarizer-accent);
   }
-  
+
   .connections {
     background: #303030;
     border-color: var(--yt-summarizer-secondary);
   }
-  
+
   .topic-summary {
     background: #303030;
     border-color: var(--yt-summarizer-accent);
   }
-  
+
   .explanation {
     background: #282828;
     border-color: var(--yt-summarizer-secondary);
   }
-  
+
   /* Topic and QA elements */
   .topic {
     background: #212121;
     border-color: #555;
   }
-  
+
   .qa {
     background: #282828;
     border-color: #555;
   }
-  
+
   .video-info {
     background: #303030;
   }
-  
+
   .footer {
     background: #282828;
     border-color: #555;
   }
-  
+
   /* Text color adjustments for better readability */
   .topic-summary strong,
   .explanation strong,
@@ -787,7 +824,7 @@
   .connections h3 {
     color: #7cdcde; /* Lighter teal for better visibility */
   }
-  
+
   .video-info h3,
   .summary p,
   .connections li,
@@ -795,26 +832,26 @@
   .answer {
     color: #f5f5f5;
   }
-  
+
   /* Better button visibility in dark mode */
   .yt-summarizer-button {
     background: linear-gradient(135deg, #ff6b6b, #ff9f43);
     color: white;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   }
-  
+
   /* Download button in dark mode */
   .download-container {
     background: #303030;
     border-color: var(--yt-summarizer-warning);
   }
-  
+
   .download-button {
     background: linear-gradient(135deg, #f5a623, #ff9f43);
     color: white;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   }
-  
+
   .download-info {
     color: #f5a623;
   }
@@ -906,11 +943,11 @@ html[system-theme="dark"] .connections h3 {
     background: #303030;
     border-color: var(--yt-summarizer-accent);
   }
-  
+
   .topic-initial h3 {
     color: #f5f5f5;
   }
-  
+
   .topic-content {
     color: #f5f5f5;
   }
@@ -938,15 +975,15 @@ html[system-theme="dark"] .topic-content {
   .yt-summarizer-panel {
     border-width: 3px;
   }
-  
+
   .topic {
     border-width: 2px;
   }
-  
+
   .qa {
     border-width: 2px;
   }
-  
+
   .yt-summarizer-button {
     border: 2px solid var(--yt-summarizer-text-white);
   }
@@ -960,7 +997,7 @@ html[system-theme="dark"] .topic-content {
     animation: none;
     transition: none;
   }
-  
+
   .yt-summarizer-button:hover,
   .topic:hover {
     transform: none;
@@ -972,17 +1009,17 @@ html[system-theme="dark"] .topic-content {
   .yt-summarizer-button {
     display: none;
   }
-  
+
   .close-btn {
     display: none;
   }
-  
+
   .yt-summarizer-panel {
     box-shadow: none;
     border: 2px solid #000;
     page-break-inside: avoid;
   }
-  
+
   .topic {
     page-break-inside: avoid;
     margin-bottom: 20px;
@@ -1017,7 +1054,7 @@ html[system-theme="dark"] .topic-content {
   top: 120px !important;
   right: 20px !important;
   z-index: 10000 !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Scroll to panel animation */
@@ -1026,9 +1063,15 @@ html[system-theme="dark"] .topic-content {
 }
 
 @keyframes yt-summarizer-highlight {
-  0% { background-color: rgba(255, 107, 107, 0.1); }
-  50% { background-color: rgba(255, 107, 107, 0.2); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: rgba(255, 107, 107, 0.1);
+  }
+  50% {
+    background-color: rgba(255, 107, 107, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 /* Slide in animation for floating elements */
@@ -1081,7 +1124,8 @@ html[system-theme="dark"] .topic-content {
 }
 
 /* Improved collapsible sections */
-.explanation-section, .qa-section {
+.explanation-section,
+.qa-section {
   position: relative;
   margin: 16px 0;
   border-radius: var(--yt-summarizer-border-radius-small);
@@ -1109,11 +1153,11 @@ html[system-theme="dark"] .topic-content {
   .section-title {
     color: #7cdcde;
   }
-  
+
   .topic-summary strong.section-title {
     color: var(--yt-summarizer-accent);
   }
-  
+
   .explanation-header strong.section-title {
     color: #7cdcde;
   }
@@ -1156,7 +1200,7 @@ html[system-theme="dark"] .explanation-header strong.section-title {
   line-height: 1.7;
 }
 
-.question, 
+.question,
 .answer {
   font-size: var(--yt-summarizer-font-size-medium);
   line-height: 1.7;

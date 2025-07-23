@@ -11,7 +11,7 @@
     "dev": "echo 'Load the extension folder in Chrome://extensions with Developer Mode enabled'",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test:coverage": "jest --coverage --collectCoverageFrom=\"tests/**/*.test.js\"",
     "test:unit": "jest tests/unit",
     "test:integration": "jest tests/integration",
     "test:e2e": "jest tests/e2e",
@@ -32,11 +32,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/youtube-summarizer-kids-extension"
+    "url": "https://github.com/adityasoni99/YoutubeSummarizerKidsExtension"
   },
-  "homepage": "https://github.com/your-username/youtube-summarizer-kids-extension#readme",
+  "homepage": "https://github.com/adityasoni99/YoutubeSummarizerKidsExtension#readme",
   "bugs": {
-    "url": "https://github.com/your-username/youtube-summarizer-kids-extension/issues"
+    "url": "https://github.com/adityasoni99/YoutubeSummarizerKidsExtension/issues"
   },
   "devDependencies": {
     "@jest/globals": "^27.5.1",

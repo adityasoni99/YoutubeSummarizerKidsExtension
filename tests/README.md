@@ -7,11 +7,13 @@ Before running tests, ensure you have Node.js (version 16 or higher) installed.
 ## Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 This will install:
+
 - Jest (testing framework)
 - Puppeteer (E2E testing)
 - Chrome extension testing utilities
@@ -20,31 +22,37 @@ This will install:
 ## Running Tests
 
 ### All Tests
+
 ```bash
 npm test
 ```
 
 ### Unit Tests Only
+
 ```bash
 npm run test:unit
 ```
 
 ### Integration Tests Only
+
 ```bash
 npm run test:integration
 ```
 
 ### End-to-End Tests Only
+
 ```bash
 npm run test:e2e
 ```
 
 ### Watch Mode (for development)
+
 ```bash
 npm run test:watch
 ```
 
 ### Coverage Report
+
 ```bash
 npm run test:coverage
 ```
@@ -69,6 +77,7 @@ tests/
 ## What Tests Cover
 
 ### Unit Tests (70+ test cases)
+
 - ✅ URL validation and video ID extraction
 - ✅ Text formatting and HTML conversion
 - ✅ Age group validation
@@ -77,7 +86,8 @@ tests/
 - ✅ Settings management and persistence
 - ✅ Error handling and edge cases
 
-### Integration Tests (20+ test cases)  
+### Integration Tests (20+ test cases)
+
 - ✅ Chrome Storage API integration
 - ✅ Chrome Runtime messaging
 - ✅ Chrome Tabs API integration
@@ -86,6 +96,7 @@ tests/
 - ✅ Error propagation across components
 
 ### End-to-End Tests (15+ test cases)
+
 - ✅ Extension installation and setup
 - ✅ YouTube page integration
 - ✅ Summary generation workflow
@@ -96,6 +107,7 @@ tests/
 ## Test Configuration
 
 Tests are configured in:
+
 - `jest.config.js` - Main Jest configuration
 - `package.json` - NPM scripts and Jest settings
 - `tests/setup.js` - Global test setup
@@ -103,12 +115,14 @@ Tests are configured in:
 ## Environment Variables
 
 Some tests may require environment variables:
+
 - `GEMINI_API_KEY` - For integration tests with real API
 - `HEADLESS_TESTING` - Set to 'false' to see browser during E2E tests
 
 ## Continuous Integration
 
 Tests are designed to run in CI environments. The configuration supports:
+
 - GitHub Actions
 - Travis CI
 - Jenkins
@@ -117,6 +131,7 @@ Tests are designed to run in CI environments. The configuration supports:
 ## Coverage Thresholds
 
 The project maintains these coverage thresholds:
+
 - Branches: 70%
 - Functions: 70%
 - Lines: 70%
@@ -125,6 +140,7 @@ The project maintains these coverage thresholds:
 ## Debugging Tests
 
 ### Running specific tests:
+
 ```bash
 # Run specific test file
 npm test -- background.test.js
@@ -137,6 +153,7 @@ npm test -- tests/unit/
 ```
 
 ### Debugging E2E tests:
+
 ```bash
 # Run E2E tests with visible browser
 HEADLESS_TESTING=false npm run test:e2e
@@ -146,6 +163,7 @@ npm run test:e2e -- --testTimeout=30000
 ```
 
 ### Verbose output:
+
 ```bash
 npm test -- --verbose
 ```
@@ -153,6 +171,7 @@ npm test -- --verbose
 ## Mock Data
 
 Tests use realistic mock data including:
+
 - Sample YouTube video information
 - Gemini API responses
 - Chrome extension storage data
@@ -171,7 +190,7 @@ Tests use realistic mock data including:
 When adding new features:
 
 1. **Add unit tests** for new functions
-2. **Add integration tests** for API interactions  
+2. **Add integration tests** for API interactions
 3. **Add E2E tests** for new user workflows
 4. **Update test utilities** if needed
 5. **Maintain coverage thresholds**
@@ -181,16 +200,19 @@ When adding new features:
 ### Common Issues
 
 **Error: "Extension not loaded"**
+
 - Ensure extension manifest is valid
 - Check that all required files exist
 - Verify Chrome version compatibility
 
 **Error: "Timeout in E2E tests"**
+
 - Increase timeout values
 - Check if YouTube page loads correctly
 - Verify extension injection timing
 
 **Error: "Mock not working"**
+
 - Clear Jest cache: `npm test -- --clearCache`
 - Check mock setup in `tests/setup.js`
 - Verify mock implementation matches API
@@ -205,6 +227,7 @@ When adding new features:
 ## Test Data
 
 Tests use kid-friendly content including:
+
 - Educational video summaries
 - Age-appropriate language validation
 - Child safety content filtering

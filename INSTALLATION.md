@@ -3,6 +3,7 @@
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Google Chrome browser (version 88 or later)
 - Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
@@ -43,7 +44,7 @@
 
 1. **Open Extension Options**:
    - Click the extension icon in Chrome toolbar
-   - Click "Settings" 
+   - Click "Settings"
    - OR: Right-click extension → "Options"
 
 2. **Enter API Key**:
@@ -78,7 +79,8 @@
 ### Extension Not Loading
 
 **Problem**: Extension doesn't appear after loading
-**Solution**: 
+**Solution**:
+
 - Check if folder contains `manifest.json`
 - Refresh chrome://extensions/ page
 - Check for error messages
@@ -87,12 +89,14 @@
 
 **Problem**: "API Key not configured" error
 **Solution**:
+
 - Verify API key is correct (no extra spaces)
 - Check API key has required permissions
 - Test key in extension options
 
 **Problem**: "API error 403" or "Access denied"
 **Solution**:
+
 - Generate new API key from Google AI Studio
 - Check Google Cloud project quotas
 - Verify billing is enabled (if required)
@@ -101,6 +105,7 @@
 
 **Problem**: Button doesn't appear on YouTube
 **Solution**:
+
 - Refresh the YouTube page
 - Check if video has captions/subtitles
 - Verify extension is enabled
@@ -109,12 +114,14 @@
 
 **Problem**: "Could not extract transcript" error
 **Solution**:
+
 - Try a different video with auto-generated captions
 - Check internet connection
 - Verify API key is working
 
 **Problem**: Slow or timeout errors
 **Solution**:
+
 - Try shorter videos first
 - Check network connection
 - Reduce maximum topics in settings
@@ -122,6 +129,7 @@
 ## 🎯 Best Practices
 
 ### Choosing Videos
+
 - ✅ Educational content with clear speech
 - ✅ Videos with auto-generated captions
 - ✅ Age-appropriate content
@@ -130,11 +138,13 @@
 - ❌ Very long videos (>30 minutes)
 
 ### Age Settings
+
 - **3-5 years**: Very simple words, basic concepts
 - **6-8 years**: Elementary explanations
 - **9-12 years**: More detailed but kid-friendly
 
 ### Optimizing Results
+
 - Use shorter videos (5-15 minutes) for best results
 - Choose educational or documentary content
 - Ensure videos have good quality captions
@@ -142,11 +152,13 @@
 ## 🔒 Privacy & Security
 
 ### Data Safety
+
 - Extension processes content locally
 - No video data is stored permanently
 - API key stored securely in Chrome
 
 ### Recommended Settings
+
 - Enable "Large Fonts" for younger children
 - Use "High Contrast" for accessibility
 - Set appropriate default age group

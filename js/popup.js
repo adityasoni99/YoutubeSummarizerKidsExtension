@@ -10,7 +10,7 @@ class PopupController {
 
   log(message, data = null) {
     if (this.debugMode) {
-      console.log(`[YT-Summarizer-Popup] ${message}`, data || '');
+      console.log(`[YT-Summarizer-Popup] ${message}`, data || "");
     }
   }
 
@@ -22,14 +22,19 @@ class PopupController {
   }
 
   async getCurrentTab() {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
     this.currentTab = tab;
   }
 
   async checkSetup() {
     // Check if API key is configured
-    const apiKeyCheck = await chrome.runtime.sendMessage({ action: 'checkApiKey' });
-    
+    const apiKeyCheck = await chrome.runtime.sendMessage({
+      action: "checkApiKey",
+    });
+
     if (!apiKeyCheck.hasApiKey) {
       this.showApiKeyWarning();
       return;
@@ -45,40 +50,42 @@ class PopupController {
   }
 
   isYouTubeVideoPage() {
-    return this.currentTab && 
-           this.currentTab.url && 
-           this.currentTab.url.includes('youtube.com/watch');
+    return (
+      this.currentTab &&
+      this.currentTab.url &&
+      this.currentTab.url.includes("youtube.com/watch")
+    );
   }
 
   showApiKeyWarning() {
     this.hideAllInterfaces();
-    document.getElementById('api-key-warning').classList.remove('hidden');
+    document.getElementById("api-key-warning").classList.remove("hidden");
   }
 
   showYouTubeInterface() {
     this.hideAllInterfaces();
-    document.getElementById('youtube-interface').classList.remove('hidden');
-    document.getElementById('age-section').classList.remove('hidden');
+    document.getElementById("youtube-interface").classList.remove("hidden");
+    document.getElementById("age-section").classList.remove("hidden");
   }
 
   showNonYouTubeInterface() {
     this.hideAllInterfaces();
-    document.getElementById('non-youtube-interface').classList.remove('hidden');
+    document.getElementById("non-youtube-interface").classList.remove("hidden");
   }
 
   hideAllInterfaces() {
     const interfaces = [
-      'youtube-interface',
-      'non-youtube-interface', 
-      'api-key-warning',
-      'age-section',
-      'status',
-      'results',
-      'error'
+      "youtube-interface",
+      "non-youtube-interface",
+      "api-key-warning",
+      "age-section",
+      "status",
+      "results",
+      "error",
     ];
-    
-    interfaces.forEach(id => {
-      document.getElementById(id).classList.add('hidden');
+
+    interfaces.forEach((id) => {
+      document.getElementById(id).classList.add("hidden");
     });
   }
 
@@ -87,50 +94,50 @@ class PopupController {
 
     try {
       // Extract video title from tab title (YouTube format: "Title - YouTube")
-      const title = this.currentTab.title.replace(' - YouTube', '');
-      document.getElementById('video-title').textContent = title;
-      document.getElementById('video-url').textContent = this.currentTab.url;
+      const title = this.currentTab.title.replace(" - YouTube", "");
+      document.getElementById("video-title").textContent = title;
+      document.getElementById("video-url").textContent = this.currentTab.url;
     } catch (error) {
-      console.error('Error loading video info:', error);
+      console.error("Error loading video info:", error);
     }
   }
 
   setupEventListeners() {
     // Summarize button
-    document.getElementById('summarize-btn').addEventListener('click', () => {
+    document.getElementById("summarize-btn").addEventListener("click", () => {
       this.handleSummarize();
     });
 
     // Settings button
-    document.getElementById('settings-btn').addEventListener('click', () => {
+    document.getElementById("settings-btn").addEventListener("click", () => {
       chrome.runtime.openOptionsPage();
     });
 
     // Open options from warning
-    document.getElementById('open-options').addEventListener('click', () => {
+    document.getElementById("open-options").addEventListener("click", () => {
       chrome.runtime.openOptionsPage();
     });
 
     // Help button
-    document.getElementById('help-btn').addEventListener('click', () => {
+    document.getElementById("help-btn").addEventListener("click", () => {
       this.showHelp();
     });
 
     // Retry button
-    document.getElementById('retry-btn').addEventListener('click', () => {
+    document.getElementById("retry-btn").addEventListener("click", () => {
       this.hideError();
       this.checkSetup();
     });
 
     // Create another summary button
-    document.getElementById('create-another').addEventListener('click', () => {
+    document.getElementById("create-another").addEventListener("click", () => {
       this.hideResults();
       this.showYouTubeInterface();
     });
 
     // Age selection change
-    document.querySelectorAll('input[name="age"]').forEach(radio => {
-      radio.addEventListener('change', () => {
+    document.querySelectorAll('input[name="age"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
         this.saveUserPreferences();
       });
     });
@@ -140,42 +147,52 @@ class PopupController {
     if (this.isProcessing) return;
 
     this.isProcessing = true;
-    this.showStatus('Creating kid-friendly summary...');
+    this.showStatus("Creating kid-friendly summary...");
 
     try {
-      const selectedAge = document.querySelector('input[name="age"]:checked').value;
-      
+      const selectedAge = document.querySelector(
+        'input[name="age"]:checked',
+      ).value;
+
       // Store age preference for the background script to use (use defaultAge to match options)
       await chrome.storage.sync.set({ defaultAge: selectedAge });
 
       const result = await chrome.runtime.sendMessage({
-        action: 'summarizeVideo',
+        action: "summarizeVideo",
         url: this.currentTab.url,
-        phase: 'initial'  // Start with initial phase
+        phase: "initial", // Start with initial phase
       });
 
       if (result.success) {
         this.showResults();
-        
+
         // Inject the summary directly into the page
         try {
           const response = await chrome.tabs.sendMessage(this.currentTab.id, {
-            action: 'displaySummary',
-            data: result.data
+            action: "displaySummary",
+            data: result.data,
           });
-          
+
           if (response && response.success) {
-            this.log('Summary successfully injected into page');
+            this.log("Summary successfully injected into page");
           } else {
-            this.log('Content script could not display summary:', response?.error || 'Unknown error');
+            this.log(
+              "Content script could not display summary:",
+              response?.error || "Unknown error",
+            );
           }
         } catch (e) {
           // Content script might not be ready or loaded
-          this.log('Could not inject summary into page - content script may not be loaded:', e.message);
-          
+          this.log(
+            "Could not inject summary into page - content script may not be loaded:",
+            e.message,
+          );
+
           // Inform user to refresh the page if content script isn't available
-          if (e.message.includes('Could not establish connection')) {
-            this.showError('Please refresh the YouTube page and try again. The content script may not be loaded yet.');
+          if (e.message.includes("Could not establish connection")) {
+            this.showError(
+              "Please refresh the YouTube page and try again. The content script may not be loaded yet.",
+            );
             return;
           }
         }
@@ -191,32 +208,32 @@ class PopupController {
   }
 
   showStatus(message) {
-    document.getElementById('status').classList.remove('hidden');
-    document.querySelector('.status-text').textContent = message;
-    document.getElementById('youtube-interface').classList.add('hidden');
+    document.getElementById("status").classList.remove("hidden");
+    document.querySelector(".status-text").textContent = message;
+    document.getElementById("youtube-interface").classList.add("hidden");
   }
 
   hideStatus() {
-    document.getElementById('status').classList.add('hidden');
+    document.getElementById("status").classList.add("hidden");
   }
 
   showResults() {
     this.hideAllInterfaces();
-    document.getElementById('results').classList.remove('hidden');
+    document.getElementById("results").classList.remove("hidden");
   }
 
   hideResults() {
-    document.getElementById('results').classList.add('hidden');
+    document.getElementById("results").classList.add("hidden");
   }
 
   showError(message) {
     this.hideAllInterfaces();
-    document.getElementById('error').classList.remove('hidden');
-    document.getElementById('error-message').textContent = message;
+    document.getElementById("error").classList.remove("hidden");
+    document.getElementById("error-message").textContent = message;
   }
 
   hideError() {
-    document.getElementById('error').classList.add('hidden');
+    document.getElementById("error").classList.add("hidden");
   }
 
   showHelp() {
@@ -237,35 +254,39 @@ Features:
 
 Need help? Check the extension options for more settings!
     `;
-    
+
     alert(helpText);
   }
 
   async loadUserPreferences() {
     try {
-      const result = await chrome.storage.sync.get(['defaultAge']);
+      const result = await chrome.storage.sync.get(["defaultAge"]);
       if (result.defaultAge) {
-        const radio = document.querySelector(`input[name="age"][value="${result.defaultAge}"]`);
+        const radio = document.querySelector(
+          `input[name="age"][value="${result.defaultAge}"]`,
+        );
         if (radio) {
           radio.checked = true;
         }
       }
     } catch (error) {
-      console.error('Error loading preferences:', error);
+      console.error("Error loading preferences:", error);
     }
   }
 
   async saveUserPreferences() {
     try {
-      const selectedAge = document.querySelector('input[name="age"]:checked').value;
+      const selectedAge = document.querySelector(
+        'input[name="age"]:checked',
+      ).value;
       await chrome.storage.sync.set({ defaultAge: selectedAge });
     } catch (error) {
-      console.error('Error saving preferences:', error);
+      console.error("Error saving preferences:", error);
     }
   }
 }
 
 // Initialize popup when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   new PopupController();
 });

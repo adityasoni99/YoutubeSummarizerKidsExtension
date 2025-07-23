@@ -9,27 +9,27 @@
   --success-color: #7ed321;
   --warning-color: #f5a623;
   --error-color: #d0021b;
-  
+
   /* Background Colors */
   --bg-primary: #f9f9f9;
   --bg-secondary: #ffffff;
   --bg-accent: #ffe8d6;
   --bg-light: #e8f4f8;
-  
+
   /* Text Colors */
   --text-primary: #333333;
   --text-secondary: #666666;
   --text-light: #999999;
   --text-white: #ffffff;
-  
+
   /* Borders and Shadows */
   --border-radius: 10px;
   --border-radius-small: 6px;
   --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
   --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
-  
+
   /* Fonts */
-  --font-family: 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+  --font-family: "Segoe UI", "Comic Sans MS", "Chalkboard SE", sans-serif;
   --font-size-small: 12px;
   --font-size-base: 14px;
   --font-size-medium: 16px;
@@ -60,7 +60,11 @@ body {
 
 /* Header */
 .header {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
   color: var(--text-white);
   padding: 20px;
   text-align: center;
@@ -138,7 +142,11 @@ body {
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--accent-color)
+  );
   color: var(--text-white);
   box-shadow: var(--shadow-light);
 }
@@ -413,11 +421,11 @@ body {
   body {
     width: 320px;
   }
-  
+
   .content {
     padding: 16px;
   }
-  
+
   .age-options {
     flex-direction: column;
   }

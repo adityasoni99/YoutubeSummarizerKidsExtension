@@ -10,68 +10,68 @@
 > Notes for AI: Carefully decide whether to use Batch/Async Node/Flow.
 
 1. **ValidateURL Node**
-   - *Purpose*: Validates that the input is a proper YouTube URL
-   - *Type*: Regular
-   - *Steps*:
-     - *prep*: Read "youtube_url" from the shared store
-     - *exec*: Call the URL validator utility function
-     - *post*: If valid, continue to next node; if invalid, return error action
+   - _Purpose_: Validates that the input is a proper YouTube URL
+   - _Type_: Regular
+   - _Steps_:
+     - _prep_: Read "youtube_url" from the shared store
+     - _exec_: Call the URL validator utility function
+     - _post_: If valid, continue to next node; if invalid, return error action
 
 2. **GetTranscript Node**
-   - *Purpose*: Retrieves the transcript and metadata for the YouTube video
-   - *Type*: Regular (consider Async for long videos)
-   - *Steps*:
-     - *prep*: Read "youtube_url" from the shared store
-     - *exec*: Call the get_transcript utility function
-     - *post*: Write "transcript" and "video_info" to the shared store
+   - _Purpose_: Retrieves the transcript and metadata for the YouTube video
+   - _Type_: Regular (consider Async for long videos)
+   - _Steps_:
+     - _prep_: Read "youtube_url" from the shared store
+     - _exec_: Call the get_transcript utility function
+     - _post_: Write "transcript" and "video_info" to the shared store
 
 3. **GenerateTopics Node**
-   - *Purpose*: Identifies main topics from the transcript
-   - *Type*: Regular
-   - *Steps*:
-     - *prep*: Read "transcript" from the shared store
-     - *exec*: Call LLM to identify and extract main topics
-     - *post*: Write initial "topics" list (with name and content) to shared store
+   - _Purpose_: Identifies main topics from the transcript
+   - _Type_: Regular
+   - _Steps_:
+     - _prep_: Read "transcript" from the shared store
+     - _exec_: Call LLM to identify and extract main topics
+     - _post_: Write initial "topics" list (with name and content) to shared store
 
 4. **TopicProcessor BatchNode**
-   - *Purpose*: Map phase - Processes each topic independently 
-   - *Type*: BatchNode (implements the Map part of MapReduce)
-   - *Steps*:
-     - *prep*: Read "topics" from the shared store and return as iterable
-     - *exec*: For each topic, call LLM to generate Q&A pairs, child-friendly explanation, and summary
-     - *post*: Collect all processed topics and write updated topics with all details to shared store
+   - _Purpose_: Map phase - Processes each topic independently
+   - _Type_: BatchNode (implements the Map part of MapReduce)
+   - _Steps_:
+     - _prep_: Read "topics" from the shared store and return as iterable
+     - _exec_: For each topic, call LLM to generate Q&A pairs, child-friendly explanation, and summary
+     - _post_: Collect all processed topics and write updated topics with all details to shared store
 
 5. **CombineTopics Node**
-   - *Purpose*: Reduce phase - Combines results from all topic processing
-   - *Type*: Regular (implements the Reduce part of MapReduce)
-   - *Steps*:
-     - *prep*: Read processed "topics" from the shared store
-     - *exec*: Call LLM to generate cohesive connections between topics and ensure consistent style
-     - *post*: Write "processed_topics" to the shared store
+   - _Purpose_: Reduce phase - Combines results from all topic processing
+   - _Type_: Regular (implements the Reduce part of MapReduce)
+   - _Steps_:
+     - _prep_: Read processed "topics" from the shared store
+     - _exec_: Call LLM to generate cohesive connections between topics and ensure consistent style
+     - _post_: Write "processed_topics" to the shared store
 
 6. **CreateSummary Node**
-   - *Purpose*: Creates an overall summary of the video in child-friendly language
-   - *Type*: Regular
-   - *Steps*:
-     - *prep*: Read "transcript" and "processed_topics" from the shared store
-     - *exec*: Call LLM to generate simple overall summary
-     - *post*: Write "summary" to the shared store
+   - _Purpose_: Creates an overall summary of the video in child-friendly language
+   - _Type_: Regular
+   - _Steps_:
+     - _prep_: Read "transcript" and "processed_topics" from the shared store
+     - _exec_: Call LLM to generate simple overall summary
+     - _post_: Write "summary" to the shared store
 
 7. **CreateHTML Node**
-   - *Purpose*: Generates HTML content from the processed data
-   - *Type*: Regular
-   - *Steps*:
-     - *prep*: Read "video_info", "processed_topics", and "summary" from the shared store
-     - *exec*: Call the generate_html utility function
-     - *post*: Write "html_content" to the shared store
+   - _Purpose_: Generates HTML content from the processed data
+   - _Type_: Regular
+   - _Steps_:
+     - _prep_: Read "video_info", "processed_topics", and "summary" from the shared store
+     - _exec_: Call the generate_html utility function
+     - _post_: Write "html_content" to the shared store
 
 8. **SaveHTML Node**
-   - *Purpose*: Saves the HTML content to a file
-   - *Type*: Regular
-   - *Steps*:
-     - *prep*: Read "html_content" and "video_info" from the shared store
-     - *exec*: Call the save_html utility function
-     - *post*: Write "output_path" to the shared store
+   - _Purpose_: Saves the HTML content to a file
+   - _Type_: Regular
+   - _Steps_:
+     - _prep_: Read "html_content" and "video_info" from the shared store
+     - _exec_: Call the save_html utility function
+     - _post_: Write "output_path" to the shared store
 
 ## Shared Store Design
 
@@ -79,11 +79,11 @@
 
 The shared store will contain:
 
-```python
+````python
 shared = {
     # Input
     "youtube_url": "https://www.youtube.com/watch?v=...",
-    
+
     # Transcript data
     "transcript": "Full text of the video transcript...",
     "video_info": {
@@ -91,7 +91,7 @@ shared = {
         "duration": 600,  # in seconds
         "thumbnail_url": "https://..."
     },
-    
+
     # Map phase - Extracted topics
     "topics": [
         {
@@ -101,7 +101,7 @@ shared = {
         },
         # More topics...
     ],
-    
+
     # Reduce phase - Processed topics with Q&A and explanations
     "processed_topics": [
         {
@@ -118,12 +118,12 @@ shared = {
         },
         # More processed topics...
     ],
-    
+
     # Output
     "summary": "Overall child-friendly summary of the video...",
     "html_content": "<!DOCTYPE html>...",
     "output_path": "/path/to/output.html",
-    
+
     # Error handling
     "error": "Error message if something goes wrong"
 }
@@ -153,47 +153,49 @@ flowchart TD
     generateQA --> createSummary[Create Summary]
     createSummary --> createHTML[Create HTML]
     createHTML --> saveHTML[Save HTML]
-```
+````
+
 ## Utility Functions
 
 > Notes for AI:
+>
 > 1. Understand the utility function definition thoroughly by reviewing the doc.
 > 2. Include only the necessary utility functions, based on nodes in the flow.
 
 1. **Call LLM** (`utils/call_llm.py`)
-   - *Input*: prompt (str)
-   - *Output*: response (str)
-   - *Necessity*: Used by most nodes for generating summaries, topics, and Q&A
+   - _Input_: prompt (str)
+   - _Output_: response (str)
+   - _Necessity_: Used by most nodes for generating summaries, topics, and Q&A
 
 2. **YouTube Transcript** (`utils/get_transcript.py`)
-   - *Input*: youtube_url (str)
-   - *Output*: transcript_info (dict) containing:
+   - _Input_: youtube_url (str)
+   - _Output_: transcript_info (dict) containing:
      - transcript (str): Full transcript text
      - title (str): Video title
      - duration (int): Video duration in seconds
      - thumbnail_url (str): URL to video thumbnail
-   - *Necessity*: Used to directly get the transcript of a YouTube video without audio processing
+   - _Necessity_: Used to directly get the transcript of a YouTube video without audio processing
 
 3. **HTML Generator** (`utils/generate_html.py`)
-   - *Input*: 
+   - _Input_:
      - title (str)
      - topics (list of dict)
      - summary (str)
      - thumbnail_url (str)
-   - *Output*: html_content (str)
-   - *Necessity*: Used to create the HTML visualization content
+   - _Output_: html_content (str)
+   - _Necessity_: Used to create the HTML visualization content
 
 4. **HTML Saver** (`utils/save_html.py`)
-   - *Input*:
+   - _Input_:
      - html_content (str)
      - filename (str)
-   - *Output*: file_path (str): Path where the HTML file was saved
-   - *Necessity*: Used to save the generated HTML content to a file
+   - _Output_: file_path (str): Path where the HTML file was saved
+   - _Necessity_: Used to save the generated HTML content to a file
 
 5. **URL Validator** (`utils/validate_url.py`)
-   - *Input*: url (str)
-   - *Output*: is_valid (bool), error_message (str) if invalid
-   - *Necessity*: Used to validate YouTube URLs before processing
+   - _Input_: url (str)
+   - _Output_: is_valid (bool), error_message (str) if invalid
+   - _Necessity_: Used to validate YouTube URLs before processing
 
 ## Node Design
 
@@ -238,19 +240,21 @@ shared = {
 > Notes for AI: Carefully decide whether to use Batch/Async Node/Flow.
 
 1. First Node
-  - *Purpose*: Provide a short explanation of the node’s function
-  - *Type*: Decide between Regular, Batch, or Async
-  - *Steps*:
-    - *prep*: Read "key" from the shared store
-    - *exec*: Call the utility function
-    - *post*: Write "key" to the shared store
+
+- _Purpose_: Provide a short explanation of the node’s function
+- _Type_: Decide between Regular, Batch, or Async
+- _Steps_:
+  - _prep_: Read "key" from the shared store
+  - _exec_: Call the utility function
+  - _post_: Write "key" to the shared store
 
 2. Second Node
-  ...
+   ...
 
 ## Flow Design
 
 > Notes for AI:
+>
 > 1. Consider the design patterns of agent, map-reduce, rag, and workflow. Apply them if they fit.
 > 2. Present a concise, high-level description of the workflow.
 
@@ -266,9 +270,9 @@ flowchart TD
     start[Input: YouTube URL] --> validate[Validate URL]
     validate -->|Valid| transcript[Get Transcript]
     validate -->|Invalid| error[Error]
-    
+
     transcript --> topics[Generate Topics]
-    
+
     subgraph map[Map Phase]
         topics --> batch[Batch Process Topics]
         batch --> topic1[Process Topic 1]
@@ -276,7 +280,7 @@ flowchart TD
         batch --> topic3[Process Topic 3]
         batch --> topicN[Process Topic N]
     end
-    
+
     subgraph reduce[Reduce Phase]
         topic1 --> combine[Combine Results]
         topic2 --> combine
@@ -284,13 +288,14 @@ flowchart TD
         topicN --> combine
         combine --> summary[Create Overall Summary]
     end
-    
+
     summary --> html[Generate HTML]
     html --> save[Save HTML]
     save --> output[Output: Kid-Friendly Summary]
 ```
 
 This design allows us to:
+
 - Process each topic independently
 - Scale efficiently with the number of topics
 - Maintain a consistent structure for all topic summaries and Q&A pairs
@@ -332,6 +337,7 @@ The Map Reduce pattern is implemented as follows:
 4. **Fault Tolerance**: If processing one topic fails, others can still succeed
 
 This pattern is particularly well-suited for our use case because:
+
 - Topics are naturally independent units
 - Each topic requires significant LLM processing
 - The final output needs to maintain a consistent style and complexity level

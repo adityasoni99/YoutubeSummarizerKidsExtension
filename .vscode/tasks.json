@@ -1,11 +1,11 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "Test YouTube Summarizer Extension",
-			"type": "shell",
-			"command": "echo '✅ Phase 1 Implementation Complete: Downloadable Summaries Feature' && echo '' && echo '📋 Summary of Implementation:' && echo '• SummaryDownloadManager class in background.js ✅' && echo '• Download message handler in background.js ✅' && echo '• Download buttons in content.js ✅' && echo '• handleDownloadSummary method implementation ✅' && echo '• triggerDownload and showDownloadNotification methods ✅' && echo '• CSS styling for download buttons ✅' && echo '• HTML generation with complete styling ✅' && echo '' && echo '🎯 Ready for Testing: Users can now download summaries as HTML files!'",
-			"group": "test"
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Test YouTube Summarizer Extension",
+      "type": "shell",
+      "command": "echo '✅ Phase 1 Implementation Complete: Downloadable Summaries Feature' && echo '' && echo '📋 Summary of Implementation:' && echo '• SummaryDownloadManager class in background.js ✅' && echo '• Download message handler in background.js ✅' && echo '• Download buttons in content.js ✅' && echo '• handleDownloadSummary method implementation ✅' && echo '• triggerDownload and showDownloadNotification methods ✅' && echo '• CSS styling for download buttons ✅' && echo '• HTML generation with complete styling ✅' && echo '' && echo '🎯 Ready for Testing: Users can now download summaries as HTML files!'",
+      "group": "test"
+    }
+  ]
 }

@@ -3,11 +3,7 @@
   "name": "YouTube Summarizer for Kids",
   "version": "1.0.0",
   "description": "Creates kid-friendly summaries of YouTube videos with Q&A pairs and simple explanations",
-  "permissions": [
-    "storage",
-    "tabs",
-    "activeTab"
-  ],
+  "permissions": ["storage", "tabs", "activeTab"],
   "host_permissions": [
     "https://www.youtube.com/*",
     "https://generativelanguage.googleapis.com/*"

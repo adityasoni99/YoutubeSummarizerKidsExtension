@@ -10,18 +10,18 @@ class YouTubeContentScript {
     this.maxRetries = 3;
     this.debugMode = true; // Enable for troubleshooting
   }
-  
+
   init() {
-    this.log('Initializing YouTube Content Script');
-    
+    this.log("Initializing YouTube Content Script");
+
     // Initialize current video ID
     this.currentVideoId = this.extractVideoId(window.location.href);
-    
+
     this.setupMessageListener();
     this.setupStorageListener(); // Listen for setting changes
     // Wait for page to load before adding button (respect auto-detect setting)
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
         this.checkAutoDetectSetting(() => this.addSummaryButton());
       });
     } else {
@@ -30,28 +30,29 @@ class YouTubeContentScript {
       });
     }
     this.observeVideoChanges();
-  }  log(message, data = null) {
+  }
+  log(message, data = null) {
     if (this.debugMode) {
-      console.log(`[YT-Summarizer] ${message}`, data || '');
+      console.log(`[YT-Summarizer] ${message}`, data || "");
     }
   }
 
   setupMessageListener() {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      if (request.action === 'getVideoInfo') {
+      if (request.action === "getVideoInfo") {
         this.getVideoInfo(request.videoId)
-          .then(result => sendResponse(result))
-          .catch(error => sendResponse({ error: error.message }));
+          .then((result) => sendResponse(result))
+          .catch((error) => sendResponse({ error: error.message }));
         return true;
       }
-      
-      if (request.action === 'displaySummary') {
-        this.log('Received displaySummary message from popup');
+
+      if (request.action === "displaySummary") {
+        this.log("Received displaySummary message from popup");
         try {
           this.displaySummary(request.data);
           sendResponse({ success: true });
         } catch (error) {
-          this.log('Error displaying summary:', error.message);
+          this.log("Error displaying summary:", error.message);
           sendResponse({ success: false, error: error.message });
         }
         return true;
@@ -62,10 +63,10 @@ class YouTubeContentScript {
   setupStorageListener() {
     // Listen for changes to storage (when settings are updated)
     chrome.storage.onChanged.addListener((changes, namespace) => {
-      if (namespace === 'sync' && changes.autoSummarize) {
+      if (namespace === "sync" && changes.autoSummarize) {
         const newValue = changes.autoSummarize.newValue;
-        this.log('Auto-detect setting changed to:', newValue);
-        
+        this.log("Auto-detect setting changed to:", newValue);
+
         if (!newValue) {
           // Auto-detect was disabled, remove all existing buttons thoroughly
           this.removeAllSummaryButtons();
@@ -80,27 +81,27 @@ class YouTubeContentScript {
   }
 
   observeVideoChanges() {
-    this.log('Setting up video change observation');
-    
+    this.log("Setting up video change observation");
+
     // Watch for URL changes (YouTube is a SPA)
     let currentUrl = window.location.href;
     const urlObserver = new MutationObserver(() => {
       if (window.location.href !== currentUrl) {
         currentUrl = window.location.href;
-        this.log('URL changed to:', currentUrl);
-        
+        this.log("URL changed to:", currentUrl);
+
         // Extract video ID from new URL
         const videoId = this.extractVideoId(currentUrl);
         if (videoId && videoId !== this.currentVideoId) {
           this.currentVideoId = videoId;
-          this.log('Video changed to:', videoId);
-          
+          this.log("Video changed to:", videoId);
+
           // Remove existing summary panel
           if (this.summaryPanel) {
             this.summaryPanel.remove();
             this.summaryPanel = null;
           }
-          
+
           // Check if auto-detect is enabled before adding button for new video
           this.checkAutoDetectSetting(() => {
             setTimeout(() => this.addSummaryButton(), 2000);
@@ -108,16 +109,16 @@ class YouTubeContentScript {
         }
       }
     });
-    
+
     // Observe changes to the document
     urlObserver.observe(document, { childList: true, subtree: true });
-    
+
     // Also watch for pushstate/popstate events
     const originalPushState = history.pushState;
     const originalReplaceState = history.replaceState;
-    
+
     const self = this;
-    history.pushState = function(...args) {
+    history.pushState = function (...args) {
       originalPushState.apply(history, args);
       setTimeout(() => {
         const videoId = self.extractVideoId(window.location.href);
@@ -126,8 +127,8 @@ class YouTubeContentScript {
         }
       }, 100);
     };
-    
-    history.replaceState = function(...args) {
+
+    history.replaceState = function (...args) {
       originalReplaceState.apply(history, args);
       setTimeout(() => {
         const videoId = self.extractVideoId(window.location.href);
@@ -136,8 +137,8 @@ class YouTubeContentScript {
         }
       }, 100);
     };
-    
-    window.addEventListener('popstate', () => {
+
+    window.addEventListener("popstate", () => {
       setTimeout(() => {
         const videoId = self.extractVideoId(window.location.href);
         if (videoId && videoId !== self.currentVideoId) {
@@ -154,14 +155,14 @@ class YouTubeContentScript {
 
   handleVideoChange(videoId) {
     this.currentVideoId = videoId;
-    this.log('Handling video change to:', videoId);
-    
+    this.log("Handling video change to:", videoId);
+
     // Remove existing summary panel
     if (this.summaryPanel) {
       this.summaryPanel.remove();
       this.summaryPanel = null;
     }
-    
+
     // Check if auto-detect is enabled before adding button
     this.checkAutoDetectSetting(() => {
       // Re-add summary button for new video if auto-detect is enabled
@@ -172,20 +173,24 @@ class YouTubeContentScript {
   // Check auto-detect setting from storage
   async checkAutoDetectSetting(callback) {
     try {
-      const result = await chrome.storage.sync.get(['autoSummarize']);
-      const autoDetectEnabled = result.autoSummarize !== undefined ? result.autoSummarize : true; // Default to true
-      
-      this.log('Auto-detect setting:', autoDetectEnabled);
-      
+      const result = await chrome.storage.sync.get(["autoSummarize"]);
+      const autoDetectEnabled =
+        result.autoSummarize !== undefined ? result.autoSummarize : true; // Default to true
+
+      this.log("Auto-detect setting:", autoDetectEnabled);
+
       if (autoDetectEnabled) {
         callback();
       } else {
-        this.log('Auto-detect disabled, removing any existing summary button');
+        this.log("Auto-detect disabled, removing any existing summary button");
         // Remove existing button if auto-detect is disabled - be more thorough
         this.removeAllSummaryButtons();
       }
     } catch (error) {
-      this.log('Error checking auto-detect setting, defaulting to enabled:', error.message);
+      this.log(
+        "Error checking auto-detect setting, defaulting to enabled:",
+        error.message,
+      );
       callback(); // Default to enabled if there's an error
     }
   }
@@ -194,178 +199,187 @@ class YouTubeContentScript {
   removeAllSummaryButtons() {
     try {
       // Remove by ID
-      const existingButton = document.getElementById('yt-summarizer-btn');
+      const existingButton = document.getElementById("yt-summarizer-btn");
       if (existingButton) {
         existingButton.remove();
-        this.log('Removed existing summary button by ID');
+        this.log("Removed existing summary button by ID");
       }
-      
+
       // Remove by class name (in case there are orphaned buttons)
-      const buttonsByClass = document.querySelectorAll('.yt-summarizer-button');
-      buttonsByClass.forEach(button => {
+      const buttonsByClass = document.querySelectorAll(".yt-summarizer-button");
+      buttonsByClass.forEach((button) => {
         button.remove();
-        this.log('Removed orphaned summary button by class');
+        this.log("Removed orphaned summary button by class");
       });
     } catch (error) {
-      this.log('Error removing summary buttons:', error.message);
+      this.log("Error removing summary buttons:", error.message);
     }
   }
 
   // Improved video information extraction with multiple fallback methods
   async getVideoInfo(videoId) {
     try {
-      this.log('Getting video info for:', videoId);
-      
+      this.log("Getting video info for:", videoId);
+
       // Wait for page elements to load
-      await this.waitForElement('h1.ytd-video-primary-info-renderer, h1[class*="title"]', 10000);
-      
+      await this.waitForElement(
+        'h1.ytd-video-primary-info-renderer, h1[class*="title"]',
+        10000,
+      );
+
       // Get video title with comprehensive selectors
       const title = await this.getVideoTitle();
-      this.log('Video title found:', title);
+      this.log("Video title found:", title);
 
       // Get thumbnail URL
       const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
       // Get video duration
       const duration = await this.getVideoDuration();
-      this.log('Video duration:', duration);
+      this.log("Video duration:", duration);
 
       // Try multiple methods to get content
       const content = await this.getVideoContent(videoId);
-      this.log('Content extracted, length:', content.length);
+      this.log("Content extracted, length:", content.length);
 
       return {
         title,
         duration,
         thumbnailUrl,
-        transcript: content
+        transcript: content,
       };
     } catch (error) {
-      this.log('Failed to extract video info:', error.message);
+      this.log("Failed to extract video info:", error.message);
       throw new Error(`Failed to extract video info: ${error.message}`);
     }
   }
 
   async getVideoTitle() {
     const titleSelectors = [
-      'h1.ytd-video-primary-info-renderer .yt-core-attributed-string',
-      'h1.ytd-video-primary-info-renderer span',
-      'h1.ytd-video-primary-info-renderer',
+      "h1.ytd-video-primary-info-renderer .yt-core-attributed-string",
+      "h1.ytd-video-primary-info-renderer span",
+      "h1.ytd-video-primary-info-renderer",
       'h1[class*="title"] span',
       'h1[class*="title"]',
-      '.title.style-scope.ytd-video-primary-info-renderer',
-      '#container h1 span',
-      '#container h1',
-      'ytd-video-primary-info-renderer h1 span',
-      'ytd-video-primary-info-renderer h1'
+      ".title.style-scope.ytd-video-primary-info-renderer",
+      "#container h1 span",
+      "#container h1",
+      "ytd-video-primary-info-renderer h1 span",
+      "ytd-video-primary-info-renderer h1",
     ];
-    
+
     for (const selector of titleSelectors) {
       const titleElement = document.querySelector(selector);
-      if (titleElement && titleElement.textContent && titleElement.textContent.trim()) {
+      if (
+        titleElement &&
+        titleElement.textContent &&
+        titleElement.textContent.trim()
+      ) {
         return titleElement.textContent.trim();
       }
     }
-    
+
     // Final fallback - use document title
     const pageTitle = document.title;
-    if (pageTitle && pageTitle.includes(' - YouTube')) {
-      return pageTitle.replace(' - YouTube', '').trim();
+    if (pageTitle && pageTitle.includes(" - YouTube")) {
+      return pageTitle.replace(" - YouTube", "").trim();
     }
-    
-    return 'YouTube Video';
+
+    return "YouTube Video";
   }
 
   async getVideoDuration() {
     let duration = 0;
-    
+
     // Try multiple selectors for duration
     const durationSelectors = [
-      '.ytp-time-duration',
-      '.ytp-time-current',
-      '.ytd-thumbnail-overlay-time-status-renderer',
-      '[class*="duration"]'
+      ".ytp-time-duration",
+      ".ytp-time-current",
+      ".ytd-thumbnail-overlay-time-status-renderer",
+      '[class*="duration"]',
     ];
-    
+
     for (const selector of durationSelectors) {
       const durationElement = document.querySelector(selector);
       if (durationElement && durationElement.textContent) {
         const timeStr = durationElement.textContent.trim();
-        if (timeStr.includes(':')) {
+        if (timeStr.includes(":")) {
           duration = this.parseTimeToSeconds(timeStr);
           break;
         }
       }
     }
-    
+
     return duration;
   }
 
   async getVideoContent(videoId) {
-    this.log('Starting content extraction...');
-    
+    this.log("Starting content extraction...");
+
     // Method 1: Try to get captions/transcript through YouTube's API approach
     try {
       const transcript = await this.extractCaptionsFromPage();
       if (transcript && transcript.length > 100) {
-        this.log('Successfully extracted captions from page');
+        this.log("Successfully extracted captions from page");
         return transcript;
       }
     } catch (error) {
-      this.log('Caption extraction failed:', error.message);
+      this.log("Caption extraction failed:", error.message);
     }
 
     // Method 2: Extract description content
     try {
       const description = await this.extractVideoDescription();
       if (description && description.length > 100) {
-        this.log('Successfully extracted description');
+        this.log("Successfully extracted description");
         return description;
       }
     } catch (error) {
-      this.log('Description extraction failed:', error.message);
+      this.log("Description extraction failed:", error.message);
     }
 
     // Method 3: Extract comments (first few)
     try {
       const comments = await this.extractTopComments();
       if (comments && comments.length > 100) {
-        this.log('Successfully extracted comments');
+        this.log("Successfully extracted comments");
         return comments;
       }
     } catch (error) {
-      this.log('Comments extraction failed:', error.message);
+      this.log("Comments extraction failed:", error.message);
     }
 
     // Method 4: Create content from available metadata
     const metadata = await this.createMetadataContent();
     if (metadata && metadata.length > 50) {
-      this.log('Using metadata as content source');
+      this.log("Using metadata as content source");
       return metadata;
     }
 
-    throw new Error('No sufficient content found for this video. The video may not have captions, description, or other extractable content.');
+    throw new Error(
+      "No sufficient content found for this video. The video may not have captions, description, or other extractable content.",
+    );
   }
 
   async extractCaptionsFromPage() {
     // Look for any transcript/caption elements that might be present
     const captionSelectors = [
-      '.ytd-transcript-segment-renderer',
-      '.ytd-transcript-body-renderer',
+      ".ytd-transcript-segment-renderer",
+      ".ytd-transcript-body-renderer",
       '[data-params*="transcript"]',
       '[aria-label*="transcript"]',
-      '[aria-label*="caption"]'
+      '[aria-label*="caption"]',
     ];
 
-    let captionText = '';
-    
+    let captionText = "";
+
     for (const selector of captionSelectors) {
       const elements = document.querySelectorAll(selector);
       if (elements.length > 0) {
-        elements.forEach(el => {
+        elements.forEach((el) => {
           const text = el.textContent?.trim();
           if (text) {
-            captionText += text + ' ';
+            captionText += text + " ";
           }
         });
       }
@@ -381,33 +395,42 @@ class YouTubeContentScript {
   async extractVideoDescription() {
     // Wait for description to potentially load
     try {
-      await this.waitForElement('#description, #meta-contents, ytd-expandable-video-description-body-renderer', 5000);
+      await this.waitForElement(
+        "#description, #meta-contents, ytd-expandable-video-description-body-renderer",
+        5000,
+      );
     } catch (e) {
-      this.log('Description elements not found quickly');
+      this.log("Description elements not found quickly");
     }
 
     const descriptionSelectors = [
-      'ytd-expandable-video-description-body-renderer #plain-snippet-text',
-      'ytd-expandable-video-description-body-renderer .yt-core-attributed-string',
-      'ytd-expandable-video-description-body-renderer span',
-      '#description.ytd-expandable-video-description-body-renderer',
-      '#description yt-formatted-string',
-      '#description-text',
-      '#meta-contents #description',
-      '.description',
-      '#watch-description-text',
-      'ytd-video-secondary-info-renderer #description',
-      '#description-inline-expander yt-formatted-string',
-      '#description-inline-expander span'
+      "ytd-expandable-video-description-body-renderer #plain-snippet-text",
+      "ytd-expandable-video-description-body-renderer .yt-core-attributed-string",
+      "ytd-expandable-video-description-body-renderer span",
+      "#description.ytd-expandable-video-description-body-renderer",
+      "#description yt-formatted-string",
+      "#description-text",
+      "#meta-contents #description",
+      ".description",
+      "#watch-description-text",
+      "ytd-video-secondary-info-renderer #description",
+      "#description-inline-expander yt-formatted-string",
+      "#description-inline-expander span",
     ];
 
     for (const selector of descriptionSelectors) {
       const element = document.querySelector(selector);
-      if (element && element.textContent && element.textContent.trim().length > 50) {
+      if (
+        element &&
+        element.textContent &&
+        element.textContent.trim().length > 50
+      ) {
         const description = element.textContent.trim();
-        this.log('Found description:', description.substring(0, 100) + '...');
+        this.log("Found description:", description.substring(0, 100) + "...");
         // Return first 3000 characters of description
-        return description.length > 3000 ? description.substring(0, 3000) + '...' : description;
+        return description.length > 3000
+          ? description.substring(0, 3000) + "..."
+          : description;
       }
     }
 
@@ -417,18 +440,21 @@ class YouTubeContentScript {
   async extractTopComments() {
     // Wait for comments to load
     try {
-      await this.waitForElement('#comments #content, ytd-comment-thread-renderer', 5000);
+      await this.waitForElement(
+        "#comments #content, ytd-comment-thread-renderer",
+        5000,
+      );
     } catch (e) {
-      this.log('Comments not found quickly');
+      this.log("Comments not found quickly");
     }
 
     const commentSelectors = [
-      '#content-text.ytd-comment-renderer',
-      '.comment-text',
-      'ytd-comment-renderer #content-text'
+      "#content-text.ytd-comment-renderer",
+      ".comment-text",
+      "ytd-comment-renderer #content-text",
     ];
 
-    let commentsText = '';
+    let commentsText = "";
     let commentCount = 0;
     const maxComments = 5;
 
@@ -436,7 +462,7 @@ class YouTubeContentScript {
       const elements = document.querySelectorAll(selector);
       for (const element of elements) {
         if (commentCount >= maxComments) break;
-        
+
         const commentText = element.textContent?.trim();
         if (commentText && commentText.length > 20) {
           commentsText += `Comment: ${commentText}\n\n`;
@@ -451,17 +477,17 @@ class YouTubeContentScript {
 
   async createMetadataContent() {
     const title = await this.getVideoTitle();
-    
+
     // Get channel name
     const channelSelectors = [
-      '#channel-name .yt-core-attributed-string',
-      '#channel-name a',
-      '.ytd-channel-name a',
+      "#channel-name .yt-core-attributed-string",
+      "#channel-name a",
+      ".ytd-channel-name a",
       '[class*="channel"] a',
-      'ytd-video-owner-renderer a'
+      "ytd-video-owner-renderer a",
     ];
 
-    let channel = '';
+    let channel = "";
     for (const selector of channelSelectors) {
       const element = document.querySelector(selector);
       if (element && element.textContent) {
@@ -471,36 +497,59 @@ class YouTubeContentScript {
     }
 
     // Get view count and date if available
-    let additionalInfo = '';
+    let additionalInfo = "";
     const metaSelectors = [
-      '#info-strings yt-formatted-string',
-      '.view-count',
-      '.upload-date'
+      "#info-strings yt-formatted-string",
+      ".view-count",
+      ".upload-date",
     ];
 
     for (const selector of metaSelectors) {
       const element = document.querySelector(selector);
       if (element && element.textContent) {
-        additionalInfo += element.textContent.trim() + '. ';
+        additionalInfo += element.textContent.trim() + ". ";
       }
     }
 
     // Create comprehensive content from available data
     const metadata = `Video Title: "${title}". 
-    Channel: ${channel || 'YouTube Channel'}. 
+    Channel: ${channel || "YouTube Channel"}. 
     ${additionalInfo}
     This educational video discusses topics related to: ${title.toLowerCase()}. 
     Based on the title, this content likely covers educational concepts that can be explained in a kid-friendly way with simple examples and easy-to-understand language. 
-    The video appears to be about educational topics that children can learn from, focusing on ${this.extractKeywords(title).join(', ')}.`;
-    
+    The video appears to be about educational topics that children can learn from, focusing on ${this.extractKeywords(title).join(", ")}.`;
+
     return metadata.length > 100 ? metadata : null;
   }
 
   extractKeywords(title) {
-    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'how', 'what', 'when', 'where', 'why', 'is', 'are', 'was', 'were'];
-    const words = title.toLowerCase().split(/\s+/).filter(word => 
-      word.length > 3 && !commonWords.includes(word)
-    );
+    const commonWords = [
+      "the",
+      "and",
+      "or",
+      "but",
+      "in",
+      "on",
+      "at",
+      "to",
+      "for",
+      "of",
+      "with",
+      "by",
+      "how",
+      "what",
+      "when",
+      "where",
+      "why",
+      "is",
+      "are",
+      "was",
+      "were",
+    ];
+    const words = title
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((word) => word.length > 3 && !commonWords.includes(word));
     return words.slice(0, 5); // Return up to 5 keywords
   }
 
@@ -522,7 +571,7 @@ class YouTubeContentScript {
 
       observer.observe(document.body, {
         childList: true,
-        subtree: true
+        subtree: true,
       });
 
       setTimeout(() => {
@@ -533,7 +582,7 @@ class YouTubeContentScript {
   }
 
   parseTimeToSeconds(timeStr) {
-    const parts = timeStr.split(':').reverse();
+    const parts = timeStr.split(":").reverse();
     let seconds = 0;
     for (let i = 0; i < parts.length; i++) {
       seconds += parseInt(parts[i]) * Math.pow(60, i);
@@ -545,37 +594,37 @@ class YouTubeContentScript {
     // Remove existing buttons thoroughly before adding new one
     this.removeAllSummaryButtons();
 
-    this.log('Adding summary button...');
+    this.log("Adding summary button...");
 
     // Try multiple insertion strategies
     const strategies = [
       () => this.insertButtonInActionsMenu(),
       () => this.insertButtonNearTitle(),
       () => this.insertButtonInSecondaryInfo(),
-      () => this.insertFloatingButton()
+      () => this.insertFloatingButton(),
     ];
 
     for (const strategy of strategies) {
       try {
         if (strategy()) {
-          this.log('Button added successfully');
+          this.log("Button added successfully");
           return;
         }
       } catch (error) {
-        this.log('Button insertion strategy failed:', error.message);
+        this.log("Button insertion strategy failed:", error.message);
       }
     }
 
-    this.log('All button insertion strategies failed');
+    this.log("All button insertion strategies failed");
   }
 
   insertButtonInActionsMenu() {
     const targetSelectors = [
-      '#actions-inner',
-      '#actions ytd-button-renderer',
-      '#top-level-buttons-computed',
-      'ytd-menu-renderer #top-level-buttons',
-      '#actions #top-level-buttons'
+      "#actions-inner",
+      "#actions ytd-button-renderer",
+      "#top-level-buttons-computed",
+      "ytd-menu-renderer #top-level-buttons",
+      "#actions #top-level-buttons",
     ];
 
     for (const selector of targetSelectors) {
@@ -583,7 +632,7 @@ class YouTubeContentScript {
       if (targetContainer) {
         const button = this.createSummaryButton();
         targetContainer.appendChild(button);
-        this.log('Button inserted in actions menu:', selector);
+        this.log("Button inserted in actions menu:", selector);
         return true;
       }
     }
@@ -591,7 +640,9 @@ class YouTubeContentScript {
   }
 
   insertButtonNearTitle() {
-    const titleContainer = document.querySelector('#title, ytd-video-primary-info-renderer, #container.ytd-video-primary-info-renderer');
+    const titleContainer = document.querySelector(
+      "#title, ytd-video-primary-info-renderer, #container.ytd-video-primary-info-renderer",
+    );
     if (titleContainer) {
       const button = this.createSummaryButton();
       button.style.cssText += `
@@ -600,14 +651,16 @@ class YouTubeContentScript {
         width: fit-content;
       `;
       titleContainer.appendChild(button);
-      this.log('Button inserted near title');
+      this.log("Button inserted near title");
       return true;
     }
     return false;
   }
 
   insertButtonInSecondaryInfo() {
-    const secondaryInfo = document.querySelector('#secondary-inner, #secondary, ytd-video-secondary-info-renderer');
+    const secondaryInfo = document.querySelector(
+      "#secondary-inner, #secondary, ytd-video-secondary-info-renderer",
+    );
     if (secondaryInfo) {
       const button = this.createSummaryButton();
       button.style.cssText += `
@@ -616,7 +669,7 @@ class YouTubeContentScript {
         width: fit-content;
       `;
       secondaryInfo.insertBefore(button, secondaryInfo.firstChild);
-      this.log('Button inserted in secondary info');
+      this.log("Button inserted in secondary info");
       return true;
     }
     return false;
@@ -640,26 +693,26 @@ class YouTubeContentScript {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
       transition: all 0.2s ease !important;
     `;
-    
-    button.addEventListener('mouseenter', () => {
-      button.style.transform = 'translateY(-2px) scale(1.05)';
+
+    button.addEventListener("mouseenter", () => {
+      button.style.transform = "translateY(-2px) scale(1.05)";
     });
-    
-    button.addEventListener('mouseleave', () => {
-      button.style.transform = 'translateY(0) scale(1)';
+
+    button.addEventListener("mouseleave", () => {
+      button.style.transform = "translateY(0) scale(1)";
     });
-    
+
     document.body.appendChild(button);
-    this.log('Floating button added');
+    this.log("Floating button added");
     return true;
   }
 
   createSummaryButton() {
-    const button = document.createElement('button');
-    button.id = 'yt-summarizer-btn';
-    button.innerHTML = '🎬 Kid-Friendly Summary';
-    button.className = 'yt-summarizer-button';
-    button.addEventListener('click', () => this.handleSummarizeClick());
+    const button = document.createElement("button");
+    button.id = "yt-summarizer-btn";
+    button.innerHTML = "🎬 Kid-Friendly Summary";
+    button.className = "yt-summarizer-button";
+    button.addEventListener("click", () => this.handleSummarizeClick());
     return button;
   }
 
@@ -668,7 +721,9 @@ class YouTubeContentScript {
 
     const videoId = this.extractVideoId();
     if (!videoId) {
-      this.showError('Could not detect video ID. Please make sure you\'re on a YouTube video page.');
+      this.showError(
+        "Could not detect video ID. Please make sure you're on a YouTube video page.",
+      );
       return;
     }
 
@@ -677,31 +732,36 @@ class YouTubeContentScript {
 
     try {
       // Check if API key is configured
-      const apiKeyCheck = await chrome.runtime.sendMessage({ action: 'checkApiKey' });
+      const apiKeyCheck = await chrome.runtime.sendMessage({
+        action: "checkApiKey",
+      });
       if (!apiKeyCheck.hasApiKey) {
-        this.showError('Please configure your Gemini API key in extension options first!', true);
+        this.showError(
+          "Please configure your Gemini API key in extension options first!",
+          true,
+        );
         return;
       }
 
       const url = window.location.href;
-      this.log('Starting initial summarization for:', url);
-      
-      const result = await chrome.runtime.sendMessage({ 
-        action: 'summarizeVideo', 
+      this.log("Starting initial summarization for:", url);
+
+      const result = await chrome.runtime.sendMessage({
+        action: "summarizeVideo",
         url: url,
-        phase: 'initial'
+        phase: "initial",
       });
 
       if (result.success) {
-        this.log('Initial summarization successful');
+        this.log("Initial summarization successful");
         this.displaySummary(result.data);
         this.showSuccessNotification();
       } else {
-        this.log('Summarization failed:', result.error);
+        this.log("Summarization failed:", result.error);
         this.showError(result.error);
       }
     } catch (error) {
-      this.log('Summarization error:', error.message);
+      this.log("Summarization error:", error.message);
       this.showError(error.message);
     } finally {
       this.isProcessing = false;
@@ -711,29 +771,29 @@ class YouTubeContentScript {
 
   extractVideoId() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('v');
+    return urlParams.get("v");
   }
 
   showLoadingState() {
-    const button = document.getElementById('yt-summarizer-btn');
+    const button = document.getElementById("yt-summarizer-btn");
     if (button) {
-      button.innerHTML = '⏳ Creating Summary...';
+      button.innerHTML = "⏳ Creating Summary...";
       button.disabled = true;
-      button.style.opacity = '0.7';
+      button.style.opacity = "0.7";
     }
   }
 
   hideLoadingState() {
-    const button = document.getElementById('yt-summarizer-btn');
+    const button = document.getElementById("yt-summarizer-btn");
     if (button) {
-      button.innerHTML = '🎬 Kid-Friendly Summary';
+      button.innerHTML = "🎬 Kid-Friendly Summary";
       button.disabled = false;
-      button.style.opacity = '1';
+      button.style.opacity = "1";
     }
   }
 
   showSuccessNotification() {
-    const notification = document.createElement('div');
+    const notification = document.createElement("div");
     notification.style.cssText = `
       position: fixed;
       top: 20px;
@@ -748,39 +808,44 @@ class YouTubeContentScript {
       animation: slideInRight 0.3s ease;
       cursor: pointer;
     `;
-    notification.innerHTML = '✅ Summary Created!<br><small>Click here to scroll to it!</small>';
-    
+    notification.innerHTML =
+      "✅ Summary Created!<br><small>Click here to scroll to it!</small>";
+
     document.body.appendChild(notification);
-    
+
     // Add click event to scroll to the summary panel
-    notification.addEventListener('click', () => {
+    notification.addEventListener("click", () => {
       if (this.summaryPanel) {
-        this.summaryPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        
+        this.summaryPanel.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
         // Add a highlight effect to make the panel more noticeable
-        this.summaryPanel.classList.add('highlight-panel');
+        this.summaryPanel.classList.add("highlight-panel");
         setTimeout(() => {
-          this.summaryPanel.classList.remove('highlight-panel');
+          this.summaryPanel.classList.remove("highlight-panel");
         }, 2000);
       }
       notification.remove();
     });
-    
+
     setTimeout(() => {
       notification.remove();
     }, 6000);
   }
 
   showError(message, showOptions = false) {
-    this.log('Showing error:', message);
-    
+    this.log("Showing error:", message);
+
     // Remove existing panels
     this.removeSummaryPanel();
-    
-    const errorPanel = document.createElement('div');
-    errorPanel.className = 'yt-summarizer-panel error';
-    
-    const optionsButton = showOptions ? `
+
+    const errorPanel = document.createElement("div");
+    errorPanel.className = "yt-summarizer-panel error";
+
+    const optionsButton = showOptions
+      ? `
       <div style="margin-top: 16px;">
         <button onclick="chrome.runtime.openOptionsPage()" style="
           background: #ff9f43;
@@ -792,8 +857,9 @@ class YouTubeContentScript {
           font-weight: 600;
         ">Open Extension Options</button>
       </div>
-    ` : '';
-    
+    `
+      : "";
+
     errorPanel.innerHTML = `
       <div class="panel-header error">
         <h3>❌ Oops! Something went wrong</h3>
@@ -831,68 +897,79 @@ class YouTubeContentScript {
   }
 
   displaySummary(data) {
-    this.log('Displaying summary:', data);
+    this.log("Displaying summary:", data);
     this.removeSummaryPanel();
-    
-    const panel = document.createElement('div');
-    panel.className = 'yt-summarizer-panel';
-    
+
+    const panel = document.createElement("div");
+    panel.className = "yt-summarizer-panel";
+
     // Choose HTML generation method based on processing state
-    if (data.processingState === 'initial') {
+    if (data.processingState === "initial") {
       panel.innerHTML = this.generateInitialSummaryHTML(data);
     } else {
       panel.innerHTML = this.generateDetailedSummaryHTML(data);
     }
-    
+
     this.insertSummaryPanel(panel);
-    
+
     // Add visual highlight when summary is displayed via popup
     if (this.summaryPanel) {
       // Add a highlight effect to make the panel more noticeable
-      this.summaryPanel.classList.add('highlight-panel');
-      
+      this.summaryPanel.classList.add("highlight-panel");
+
       // Scroll to the panel with a slight delay to ensure rendering
       setTimeout(() => {
-        this.summaryPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        
+        this.summaryPanel.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
         // Remove highlight after animation
         setTimeout(() => {
           if (this.summaryPanel) {
-            this.summaryPanel.classList.remove('highlight-panel');
+            this.summaryPanel.classList.remove("highlight-panel");
           }
         }, 3000);
       }, 500);
     }
-    
+
     // Ensure sections are collapsed by default
     setTimeout(() => this.collapseByDefault(), 300);
-    
+
     // Set up event listeners for the "View Detailed Summary" button if in initial state
-    if (data.processingState === 'initial') {
-      const detailsButton = panel.querySelector('#view-detailed-summary');
+    if (data.processingState === "initial") {
+      const detailsButton = panel.querySelector("#view-detailed-summary");
       if (detailsButton) {
-        detailsButton.addEventListener('click', () => this.handleDetailedSummaryRequest());
+        detailsButton.addEventListener("click", () =>
+          this.handleDetailedSummaryRequest(),
+        );
       }
     }
-    
+
     // Set up event listener for the download button
-    const downloadButton = panel.querySelector('#download-summary');
+    const downloadButton = panel.querySelector("#download-summary");
     if (downloadButton) {
-      downloadButton.addEventListener('click', () => this.handleDownloadSummary(data));
+      downloadButton.addEventListener("click", () =>
+        this.handleDownloadSummary(data),
+      );
     }
   }
 
   generateInitialSummaryHTML(data) {
     const { videoInfo, summary, topics } = data;
-    
-    const topicsHTML = topics.map(topic => `
+
+    const topicsHTML = topics
+      .map(
+        (topic) => `
       <div class="topic-initial">
         <h3>📚 ${topic.name}</h3>
         <div class="topic-content">
           ${topic.content}
         </div>
       </div>
-    `).join('');
+    `,
+      )
+      .join("");
 
     return `
       <div class="panel-header">
@@ -937,21 +1014,24 @@ class YouTubeContentScript {
   }
 
   generateDetailedSummaryHTML(data) {
-    const { videoInfo, summary, topics, processedTopics, topicConnections } = data;
-    
-    let connectionsHTML = '';
+    const { videoInfo, summary, topics, processedTopics, topicConnections } =
+      data;
+
+    let connectionsHTML = "";
     if (topicConnections && topicConnections.length > 0) {
       connectionsHTML = `
         <div class="connections">
           <h3>🔗 How these topics connect:</h3>
           <ul>
-            ${topicConnections.map(conn => `<li>${conn}</li>`).join('')}
+            ${topicConnections.map((conn) => `<li>${conn}</li>`).join("")}
           </ul>
         </div>
       `;
     }
 
-    const topicsHTML = processedTopics.map(topic => `
+    const topicsHTML = processedTopics
+      .map(
+        (topic) => `
       <div class="topic">
         <h3>📚 ${topic.name}</h3>
         <div class="topic-summary">
@@ -974,16 +1054,22 @@ class YouTubeContentScript {
             <span class="toggle-icon">►</span>
           </div>
           <div class="qa-content">
-            ${topic.qaPairs.map(qa => `
+            ${topic.qaPairs
+              .map(
+                (qa) => `
               <div class="qa">
                 <div class="question">Q: ${qa.question}</div>
                 <div class="answer">A: ${qa.answer}</div>
               </div>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </div>
         </div>
       </div>
-    `).join('');
+    `,
+      )
+      .join("");
 
     return `
       <div class="panel-header">
@@ -1024,38 +1110,40 @@ class YouTubeContentScript {
 
   async handleDetailedSummaryRequest() {
     try {
-      this.log('Requesting detailed summary...');
-      
+      this.log("Requesting detailed summary...");
+
       // Find the detailed button and replace with loading indicator
-      const detailsButton = document.querySelector('#view-detailed-summary');
+      const detailsButton = document.querySelector("#view-detailed-summary");
       if (detailsButton) {
-        detailsButton.innerHTML = '<span class="loading-spinner"></span> Processing Detailed Summary...';
+        detailsButton.innerHTML =
+          '<span class="loading-spinner"></span> Processing Detailed Summary...';
         detailsButton.disabled = true;
       }
-      
+
       // Get current video URL
       const url = window.location.href;
-      
+
       // Request detailed processing from background script
       const result = await chrome.runtime.sendMessage({
-        action: 'summarizeVideo',
+        action: "summarizeVideo",
         url,
-        phase: 'detailed'
+        phase: "detailed",
       });
-      
+
       if (result.success) {
-        this.log('Detailed summary received:', result);
+        this.log("Detailed summary received:", result);
         this.displaySummary(result.data);
       } else {
-        throw new Error(result.error || 'Failed to process detailed summary');
+        throw new Error(result.error || "Failed to process detailed summary");
       }
     } catch (error) {
-      this.log('Error getting detailed summary:', error.message);
-      
+      this.log("Error getting detailed summary:", error.message);
+
       // Show error message
-      const detailsButton = document.querySelector('#view-detailed-summary');
+      const detailsButton = document.querySelector("#view-detailed-summary");
       if (detailsButton) {
-        detailsButton.innerHTML = '❌ Error: Could not generate detailed summary';
+        detailsButton.innerHTML =
+          "❌ Error: Could not generate detailed summary";
         detailsButton.disabled = true;
       }
     }
@@ -1063,77 +1151,77 @@ class YouTubeContentScript {
 
   insertSummaryPanel(panel) {
     try {
-      this.log('Inserting summary panel...');
-      
+      this.log("Inserting summary panel...");
+
       // Strategy 1: Try to insert in comments section first
-      const commentsSection = document.querySelector('#comments');
+      const commentsSection = document.querySelector("#comments");
       if (commentsSection) {
         commentsSection.parentNode.insertBefore(panel, commentsSection);
-        this.log('Panel inserted before comments section');
-        
+        this.log("Panel inserted before comments section");
+
         // Scroll to the panel with a slight delay to ensure rendering
         setTimeout(() => {
-          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 500);
-        
+
         this.summaryPanel = panel;
         return true;
       }
-      
+
       // Strategy 2: Try to insert after video info
-      const videoInfo = document.querySelector('#info, #meta, #info-contents');
+      const videoInfo = document.querySelector("#info, #meta, #info-contents");
       if (videoInfo) {
         videoInfo.parentNode.insertBefore(panel, videoInfo.nextSibling);
-        this.log('Panel inserted after video info');
-        
+        this.log("Panel inserted after video info");
+
         setTimeout(() => {
-          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 500);
-        
+
         this.summaryPanel = panel;
         return true;
       }
-      
+
       // Strategy 3: Insert after primary column
-      const primaryColumn = document.querySelector('#primary, #primary-inner');
+      const primaryColumn = document.querySelector("#primary, #primary-inner");
       if (primaryColumn) {
         primaryColumn.appendChild(panel);
-        this.log('Panel appended to primary column');
-        
+        this.log("Panel appended to primary column");
+
         setTimeout(() => {
-          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 500);
-        
+
         this.summaryPanel = panel;
         return true;
       }
-      
+
       // Strategy 4: Fallback - insert as floating panel
-      panel.style.position = 'fixed';
-      panel.style.top = '80px';
-      panel.style.right = '20px';
-      panel.style.maxWidth = '400px';
-      panel.style.maxHeight = '80vh';
-      panel.style.overflowY = 'auto';
-      panel.style.zIndex = '9999';
-      panel.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-      
+      panel.style.position = "fixed";
+      panel.style.top = "80px";
+      panel.style.right = "20px";
+      panel.style.maxWidth = "400px";
+      panel.style.maxHeight = "80vh";
+      panel.style.overflowY = "auto";
+      panel.style.zIndex = "9999";
+      panel.style.boxShadow = "0 4px 20px rgba(0,0,0,0.3)";
+
       document.body.appendChild(panel);
-      this.log('Panel inserted as floating element');
-      
+      this.log("Panel inserted as floating element");
+
       this.summaryPanel = panel;
       return true;
     } catch (error) {
-      this.log('Failed to insert panel:', error.message);
-      
+      this.log("Failed to insert panel:", error.message);
+
       // Last resort - append to body
       try {
         document.body.appendChild(panel);
-        this.log('Panel appended to body as last resort');
+        this.log("Panel appended to body as last resort");
         this.summaryPanel = panel;
         return true;
       } catch (finalError) {
-        this.log('All insertion methods failed:', finalError.message);
+        this.log("All insertion methods failed:", finalError.message);
         return false;
       }
     }
@@ -1145,94 +1233,106 @@ class YouTubeContentScript {
       if (this.summaryPanel) {
         this.summaryPanel.remove();
         this.summaryPanel = null;
-        this.log('Existing summary panel removed');
+        this.log("Existing summary panel removed");
       }
-      
+
       // Clean up any other panels that might be orphaned
-      const existingPanels = document.querySelectorAll('.yt-summarizer-panel');
-      existingPanels.forEach(panel => {
+      const existingPanels = document.querySelectorAll(".yt-summarizer-panel");
+      existingPanels.forEach((panel) => {
         panel.remove();
-        this.log('Cleaned up orphaned panel');
+        this.log("Cleaned up orphaned panel");
       });
     } catch (error) {
-      this.log('Error removing panels:', error.message);
+      this.log("Error removing panels:", error.message);
     }
   }
 
   collapseByDefault() {
     try {
       if (!this.summaryPanel) return;
-      
+
       // Collapse all expandable sections by default
-      const expandableSections = this.summaryPanel.querySelectorAll('.explanation-content, .qa-content');
-      expandableSections.forEach(section => {
-        section.style.display = 'none';
+      const expandableSections = this.summaryPanel.querySelectorAll(
+        ".explanation-content, .qa-content",
+      );
+      expandableSections.forEach((section) => {
+        section.style.display = "none";
       });
-      
+
       // Setup toggle functionality and set initial arrow direction
-      const toggleHeaders = this.summaryPanel.querySelectorAll('.explanation-header, .qa-section-header');
-      toggleHeaders.forEach(header => {
+      const toggleHeaders = this.summaryPanel.querySelectorAll(
+        ".explanation-header, .qa-section-header",
+      );
+      toggleHeaders.forEach((header) => {
         // Remove any existing listeners
         const newHeader = header.cloneNode(true);
         header.parentNode.replaceChild(newHeader, header);
-        
+
         // Set initial arrow direction to right (collapsed state)
-        const icon = newHeader.querySelector('.toggle-icon');
-        if (icon) icon.textContent = '►';
-        
+        const icon = newHeader.querySelector(".toggle-icon");
+        if (icon) icon.textContent = "►";
+
         // Add click handler
-        newHeader.addEventListener('click', () => {
+        newHeader.addEventListener("click", () => {
           const content = newHeader.nextElementSibling;
-          const icon = newHeader.querySelector('.toggle-icon');
-          
-          if (content.style.display === 'none') {
-            content.style.display = 'block';
-            if (icon) icon.textContent = '▼';
+          const icon = newHeader.querySelector(".toggle-icon");
+
+          if (content.style.display === "none") {
+            content.style.display = "block";
+            if (icon) icon.textContent = "▼";
           } else {
-            content.style.display = 'none';
-            if (icon) icon.textContent = '►';
+            content.style.display = "none";
+            if (icon) icon.textContent = "►";
           }
         });
       });
     } catch (error) {
-      this.log('Error setting up collapsible sections:', error.message);
+      this.log("Error setting up collapsible sections:", error.message);
     }
   }
 
   // Download Summary Functionality
   async handleDownloadSummary(data) {
     try {
-      this.log('Starting download process for summary');
-      
-      const downloadButton = document.querySelector('#download-summary');
+      this.log("Starting download process for summary");
+
+      const downloadButton = document.querySelector("#download-summary");
       if (downloadButton) {
         // Show loading state
         const originalContent = downloadButton.innerHTML;
-        downloadButton.innerHTML = '<span class="button-icon">⏳</span> Generating...';
+        downloadButton.innerHTML =
+          '<span class="button-icon">⏳</span> Generating...';
         downloadButton.disabled = true;
       }
 
       // Request HTML generation from background script
       const response = await chrome.runtime.sendMessage({
-        action: 'downloadSummary',
-        data: data
+        action: "downloadSummary",
+        data: data,
       });
 
       if (response.success) {
-        this.log('Download HTML generated successfully');
+        this.log("Download HTML generated successfully");
         this.triggerDownload(response.html, response.filename);
-        this.showDownloadNotification('success', 'Summary downloaded successfully!');
+        this.showDownloadNotification(
+          "success",
+          "Summary downloaded successfully!",
+        );
       } else {
-        throw new Error(response.error || 'Failed to generate download');
+        throw new Error(response.error || "Failed to generate download");
       }
     } catch (error) {
-      this.log('Download failed:', error.message);
-      this.showDownloadNotification('error', `Download failed: ${error.message}`);
+      this.log("Download failed:", error.message);
+      this.showDownloadNotification(
+        "error",
+        `Download failed: ${error.message}`,
+      );
     } finally {
       // Restore button state
-      const downloadButton = document.querySelector('#download-summary');
+      const downloadButton = document.querySelector("#download-summary");
       if (downloadButton) {
-        downloadButton.innerHTML = '<span class="button-icon">💾</span> Download Summary';
+        downloadButton.innerHTML =
+          '<span class="button-icon">💾</span> Download Summary';
         downloadButton.disabled = false;
       }
     }
@@ -1241,41 +1341,43 @@ class YouTubeContentScript {
   triggerDownload(htmlContent, filename) {
     try {
       // Create blob with HTML content
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
       const url = URL.createObjectURL(blob);
-      
+
       // Create temporary download link
-      const downloadLink = document.createElement('a');
+      const downloadLink = document.createElement("a");
       downloadLink.href = url;
       downloadLink.download = filename;
-      downloadLink.style.display = 'none';
-      
+      downloadLink.style.display = "none";
+
       // Trigger download
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      
+
       // Clean up
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      
-      this.log('Download triggered successfully:', filename);
+
+      this.log("Download triggered successfully:", filename);
     } catch (error) {
-      this.log('Failed to trigger download:', error.message);
+      this.log("Failed to trigger download:", error.message);
       throw error;
     }
   }
 
   showDownloadNotification(type, message) {
-    const notification = document.createElement('div');
-    const isSuccess = type === 'success';
-    
+    const notification = document.createElement("div");
+    const isSuccess = type === "success";
+
     notification.style.cssText = `
       position: fixed;
       top: 20px;
       right: 20px;
-      background: ${isSuccess ? 
-        'linear-gradient(135deg, #7ed321, #4ecdc4)' : 
-        'linear-gradient(135deg, #ff6b6b, #ff8e53)'};
+      background: ${
+        isSuccess
+          ? "linear-gradient(135deg, #7ed321, #4ecdc4)"
+          : "linear-gradient(135deg, #ff6b6b, #ff8e53)"
+      };
       color: white;
       padding: 12px 20px;
       border-radius: 8px;
@@ -1286,51 +1388,51 @@ class YouTubeContentScript {
       cursor: pointer;
       max-width: 300px;
     `;
-    
+
     notification.innerHTML = `
-      ${isSuccess ? '✅' : '❌'} ${message}
+      ${isSuccess ? "✅" : "❌"} ${message}
       <br><small>Click to dismiss</small>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Auto-remove after 5 seconds or on click
     const removeNotification = () => {
       if (notification.parentNode) {
         notification.remove();
       }
     };
-    
-    notification.addEventListener('click', removeNotification);
+
+    notification.addEventListener("click", removeNotification);
     setTimeout(removeNotification, 5000);
   }
 
   formatTextForHTML(text) {
-    if (!text || typeof text !== 'string') return text;
-    
+    if (!text || typeof text !== "string") return text;
+
     // Convert line breaks to <br> tags
-    let formattedText = text.replace(/\n/g, '<br>');
-    
+    let formattedText = text.replace(/\n/g, "<br>");
+
     // Convert bullet points (* text) to proper HTML lists
     const bulletRegex = /\* ([^*\n]+)/g;
     if (bulletRegex.test(text)) {
       // Split by line breaks and process
-      const lines = text.split('\n');
+      const lines = text.split("\n");
       let inList = false;
-      let result = '';
-      
+      let result = "";
+
       for (let line of lines) {
         line = line.trim();
-        if (line.startsWith('* ')) {
+        if (line.startsWith("* ")) {
           if (!inList) {
-            result += '<ul>';
+            result += "<ul>";
             inList = true;
           }
           const bulletContent = line.substring(2).trim();
           result += `<li>${this.formatInlineText(bulletContent)}</li>`;
         } else {
           if (inList) {
-            result += '</ul>';
+            result += "</ul>";
             inList = false;
           }
           if (line) {
@@ -1338,38 +1440,42 @@ class YouTubeContentScript {
           }
         }
       }
-      
+
       if (inList) {
-        result += '</ul>';
+        result += "</ul>";
       }
-      
+
       return result;
     }
-    
+
     // If no bullet points, just format inline text and preserve line breaks
-    return formattedText.split('<br>').map(line => {
-      line = line.trim();
-      return line ? `<p>${this.formatInlineText(line)}</p>` : '';
-    }).filter(line => line).join('');
+    return formattedText
+      .split("<br>")
+      .map((line) => {
+        line = line.trim();
+        return line ? `<p>${this.formatInlineText(line)}</p>` : "";
+      })
+      .filter((line) => line)
+      .join("");
   }
 
   formatInlineText(text) {
     if (!text) return text;
-    
+
     // Convert ALL CAPS words to bold (common pattern in the text)
-    text = text.replace(/\b[A-Z]{2,}\b/g, '<strong>$&</strong>');
-    
+    text = text.replace(/\b[A-Z]{2,}\b/g, "<strong>$&</strong>");
+
     // Convert text between asterisks to bold
-    text = text.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
-    
+    text = text.replace(/\*([^*]+)\*/g, "<strong>$1</strong>");
+
     // Convert text in quotes to emphasis
     text = text.replace(/"([^"]+)"/g, '<em>"$1"</em>');
-    
+
     return text;
   }
 
   showSuccessNotification() {
-    const notification = document.createElement('div');
+    const notification = document.createElement("div");
     notification.style.cssText = `
       position: fixed;
       top: 20px;
@@ -1384,39 +1490,44 @@ class YouTubeContentScript {
       animation: slideInRight 0.3s ease;
       cursor: pointer;
     `;
-    notification.innerHTML = '✅ Summary Created!<br><small>Click here to scroll to it!</small>';
-    
+    notification.innerHTML =
+      "✅ Summary Created!<br><small>Click here to scroll to it!</small>";
+
     document.body.appendChild(notification);
-    
+
     // Add click event to scroll to the summary panel
-    notification.addEventListener('click', () => {
+    notification.addEventListener("click", () => {
       if (this.summaryPanel) {
-        this.summaryPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        
+        this.summaryPanel.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
         // Add a highlight effect to make the panel more noticeable
-        this.summaryPanel.classList.add('highlight-panel');
+        this.summaryPanel.classList.add("highlight-panel");
         setTimeout(() => {
-          this.summaryPanel.classList.remove('highlight-panel');
+          this.summaryPanel.classList.remove("highlight-panel");
         }, 2000);
       }
       notification.remove();
     });
-    
+
     setTimeout(() => {
       notification.remove();
     }, 6000);
   }
 
   showError(message, showOptions = false) {
-    this.log('Showing error:', message);
-    
+    this.log("Showing error:", message);
+
     // Remove existing panels
     this.removeSummaryPanel();
-    
-    const errorPanel = document.createElement('div');
-    errorPanel.className = 'yt-summarizer-panel error';
-    
-    const optionsButton = showOptions ? `
+
+    const errorPanel = document.createElement("div");
+    errorPanel.className = "yt-summarizer-panel error";
+
+    const optionsButton = showOptions
+      ? `
       <div style="margin-top: 16px;">
         <button onclick="chrome.runtime.openOptionsPage()" style="
           background: #ff9f43;
@@ -1428,8 +1539,9 @@ class YouTubeContentScript {
           font-weight: 600;
         ">Open Extension Options</button>
       </div>
-    ` : '';
-    
+    `
+      : "";
+
     errorPanel.innerHTML = `
       <div class="panel-header error">
         <h3>❌ Oops! Something went wrong</h3>
@@ -1467,68 +1579,79 @@ class YouTubeContentScript {
   }
 
   displaySummary(data) {
-    this.log('Displaying summary:', data);
+    this.log("Displaying summary:", data);
     this.removeSummaryPanel();
-    
-    const panel = document.createElement('div');
-    panel.className = 'yt-summarizer-panel';
-    
+
+    const panel = document.createElement("div");
+    panel.className = "yt-summarizer-panel";
+
     // Choose HTML generation method based on processing state
-    if (data.processingState === 'initial') {
+    if (data.processingState === "initial") {
       panel.innerHTML = this.generateInitialSummaryHTML(data);
     } else {
       panel.innerHTML = this.generateDetailedSummaryHTML(data);
     }
-    
+
     this.insertSummaryPanel(panel);
-    
+
     // Add visual highlight when summary is displayed via popup
     if (this.summaryPanel) {
       // Add a highlight effect to make the panel more noticeable
-      this.summaryPanel.classList.add('highlight-panel');
-      
+      this.summaryPanel.classList.add("highlight-panel");
+
       // Scroll to the panel with a slight delay to ensure rendering
       setTimeout(() => {
-        this.summaryPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        
+        this.summaryPanel.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
         // Remove highlight after animation
         setTimeout(() => {
           if (this.summaryPanel) {
-            this.summaryPanel.classList.remove('highlight-panel');
+            this.summaryPanel.classList.remove("highlight-panel");
           }
         }, 3000);
       }, 500);
     }
-    
+
     // Ensure sections are collapsed by default
     setTimeout(() => this.collapseByDefault(), 300);
-    
+
     // Set up event listeners for the "View Detailed Summary" button if in initial state
-    if (data.processingState === 'initial') {
-      const detailsButton = panel.querySelector('#view-detailed-summary');
+    if (data.processingState === "initial") {
+      const detailsButton = panel.querySelector("#view-detailed-summary");
       if (detailsButton) {
-        detailsButton.addEventListener('click', () => this.handleDetailedSummaryRequest());
+        detailsButton.addEventListener("click", () =>
+          this.handleDetailedSummaryRequest(),
+        );
       }
     }
-    
+
     // Set up event listener for the download button
-    const downloadButton = panel.querySelector('#download-summary');
+    const downloadButton = panel.querySelector("#download-summary");
     if (downloadButton) {
-      downloadButton.addEventListener('click', () => this.handleDownloadSummary(data));
+      downloadButton.addEventListener("click", () =>
+        this.handleDownloadSummary(data),
+      );
     }
   }
 
   generateInitialSummaryHTML(data) {
     const { videoInfo, summary, topics } = data;
-    
-    const topicsHTML = topics.map(topic => `
+
+    const topicsHTML = topics
+      .map(
+        (topic) => `
       <div class="topic-initial">
         <h3>📚 ${topic.name}</h3>
         <div class="topic-content">
           ${topic.content}
         </div>
       </div>
-    `).join('');
+    `,
+      )
+      .join("");
 
     return `
       <div class="panel-header">
@@ -1573,21 +1696,24 @@ class YouTubeContentScript {
   }
 
   generateDetailedSummaryHTML(data) {
-    const { videoInfo, summary, topics, processedTopics, topicConnections } = data;
-    
-    let connectionsHTML = '';
+    const { videoInfo, summary, topics, processedTopics, topicConnections } =
+      data;
+
+    let connectionsHTML = "";
     if (topicConnections && topicConnections.length > 0) {
       connectionsHTML = `
         <div class="connections">
           <h3>🔗 How these topics connect:</h3>
           <ul>
-            ${topicConnections.map(conn => `<li>${conn}</li>`).join('')}
+            ${topicConnections.map((conn) => `<li>${conn}</li>`).join("")}
           </ul>
         </div>
       `;
     }
 
-    const topicsHTML = processedTopics.map(topic => `
+    const topicsHTML = processedTopics
+      .map(
+        (topic) => `
       <div class="topic">
         <h3>📚 ${topic.name}</h3>
         <div class="topic-summary">
@@ -1610,16 +1736,22 @@ class YouTubeContentScript {
             <span class="toggle-icon">►</span>
           </div>
           <div class="qa-content">
-            ${topic.qaPairs.map(qa => `
+            ${topic.qaPairs
+              .map(
+                (qa) => `
               <div class="qa">
                 <div class="question">Q: ${qa.question}</div>
                 <div class="answer">A: ${qa.answer}</div>
               </div>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </div>
         </div>
       </div>
-    `).join('');
+    `,
+      )
+      .join("");
 
     return `
       <div class="panel-header">
@@ -1660,38 +1792,40 @@ class YouTubeContentScript {
 
   async handleDetailedSummaryRequest() {
     try {
-      this.log('Requesting detailed summary...');
-      
+      this.log("Requesting detailed summary...");
+
       // Find the detailed button and replace with loading indicator
-      const detailsButton = document.querySelector('#view-detailed-summary');
+      const detailsButton = document.querySelector("#view-detailed-summary");
       if (detailsButton) {
-        detailsButton.innerHTML = '<span class="loading-spinner"></span> Processing Detailed Summary...';
+        detailsButton.innerHTML =
+          '<span class="loading-spinner"></span> Processing Detailed Summary...';
         detailsButton.disabled = true;
       }
-      
+
       // Get current video URL
       const url = window.location.href;
-      
+
       // Request detailed processing from background script
       const result = await chrome.runtime.sendMessage({
-        action: 'summarizeVideo',
+        action: "summarizeVideo",
         url,
-        phase: 'detailed'
+        phase: "detailed",
       });
-      
+
       if (result.success) {
-        this.log('Detailed summary received:', result);
+        this.log("Detailed summary received:", result);
         this.displaySummary(result.data);
       } else {
-        throw new Error(result.error || 'Failed to process detailed summary');
+        throw new Error(result.error || "Failed to process detailed summary");
       }
     } catch (error) {
-      this.log('Error getting detailed summary:', error.message);
-      
+      this.log("Error getting detailed summary:", error.message);
+
       // Show error message
-      const detailsButton = document.querySelector('#view-detailed-summary');
+      const detailsButton = document.querySelector("#view-detailed-summary");
       if (detailsButton) {
-        detailsButton.innerHTML = '❌ Error: Could not generate detailed summary';
+        detailsButton.innerHTML =
+          "❌ Error: Could not generate detailed summary";
         detailsButton.disabled = true;
       }
     }
@@ -1699,77 +1833,77 @@ class YouTubeContentScript {
 
   insertSummaryPanel(panel) {
     try {
-      this.log('Inserting summary panel...');
-      
+      this.log("Inserting summary panel...");
+
       // Strategy 1: Try to insert in comments section first
-      const commentsSection = document.querySelector('#comments');
+      const commentsSection = document.querySelector("#comments");
       if (commentsSection) {
         commentsSection.parentNode.insertBefore(panel, commentsSection);
-        this.log('Panel inserted before comments section');
-        
+        this.log("Panel inserted before comments section");
+
         // Scroll to the panel with a slight delay to ensure rendering
         setTimeout(() => {
-          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 500);
-        
+
         this.summaryPanel = panel;
         return true;
       }
-      
+
       // Strategy 2: Try to insert after video info
-      const videoInfo = document.querySelector('#info, #meta, #info-contents');
+      const videoInfo = document.querySelector("#info, #meta, #info-contents");
       if (videoInfo) {
         videoInfo.parentNode.insertBefore(panel, videoInfo.nextSibling);
-        this.log('Panel inserted after video info');
-        
+        this.log("Panel inserted after video info");
+
         setTimeout(() => {
-          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 500);
-        
+
         this.summaryPanel = panel;
         return true;
       }
-      
+
       // Strategy 3: Insert after primary column
-      const primaryColumn = document.querySelector('#primary, #primary-inner');
+      const primaryColumn = document.querySelector("#primary, #primary-inner");
       if (primaryColumn) {
         primaryColumn.appendChild(panel);
-        this.log('Panel appended to primary column');
-        
+        this.log("Panel appended to primary column");
+
         setTimeout(() => {
-          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 500);
-        
+
         this.summaryPanel = panel;
         return true;
       }
-      
+
       // Strategy 4: Fallback - insert as floating panel
-      panel.style.position = 'fixed';
-      panel.style.top = '80px';
-      panel.style.right = '20px';
-      panel.style.maxWidth = '400px';
-      panel.style.maxHeight = '80vh';
-      panel.style.overflowY = 'auto';
-      panel.style.zIndex = '9999';
-      panel.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-      
+      panel.style.position = "fixed";
+      panel.style.top = "80px";
+      panel.style.right = "20px";
+      panel.style.maxWidth = "400px";
+      panel.style.maxHeight = "80vh";
+      panel.style.overflowY = "auto";
+      panel.style.zIndex = "9999";
+      panel.style.boxShadow = "0 4px 20px rgba(0,0,0,0.3)";
+
       document.body.appendChild(panel);
-      this.log('Panel inserted as floating element');
-      
+      this.log("Panel inserted as floating element");
+
       this.summaryPanel = panel;
       return true;
     } catch (error) {
-      this.log('Failed to insert panel:', error.message);
-      
+      this.log("Failed to insert panel:", error.message);
+
       // Last resort - append to body
       try {
         document.body.appendChild(panel);
-        this.log('Panel appended to body as last resort');
+        this.log("Panel appended to body as last resort");
         this.summaryPanel = panel;
         return true;
       } catch (finalError) {
-        this.log('All insertion methods failed:', finalError.message);
+        this.log("All insertion methods failed:", finalError.message);
         return false;
       }
     }
@@ -1781,94 +1915,106 @@ class YouTubeContentScript {
       if (this.summaryPanel) {
         this.summaryPanel.remove();
         this.summaryPanel = null;
-        this.log('Existing summary panel removed');
+        this.log("Existing summary panel removed");
       }
-      
+
       // Clean up any other panels that might be orphaned
-      const existingPanels = document.querySelectorAll('.yt-summarizer-panel');
-      existingPanels.forEach(panel => {
+      const existingPanels = document.querySelectorAll(".yt-summarizer-panel");
+      existingPanels.forEach((panel) => {
         panel.remove();
-        this.log('Cleaned up orphaned panel');
+        this.log("Cleaned up orphaned panel");
       });
     } catch (error) {
-      this.log('Error removing panels:', error.message);
+      this.log("Error removing panels:", error.message);
     }
   }
 
   collapseByDefault() {
     try {
       if (!this.summaryPanel) return;
-      
+
       // Collapse all expandable sections by default
-      const expandableSections = this.summaryPanel.querySelectorAll('.explanation-content, .qa-content');
-      expandableSections.forEach(section => {
-        section.style.display = 'none';
+      const expandableSections = this.summaryPanel.querySelectorAll(
+        ".explanation-content, .qa-content",
+      );
+      expandableSections.forEach((section) => {
+        section.style.display = "none";
       });
-      
+
       // Setup toggle functionality and set initial arrow direction
-      const toggleHeaders = this.summaryPanel.querySelectorAll('.explanation-header, .qa-section-header');
-      toggleHeaders.forEach(header => {
+      const toggleHeaders = this.summaryPanel.querySelectorAll(
+        ".explanation-header, .qa-section-header",
+      );
+      toggleHeaders.forEach((header) => {
         // Remove any existing listeners
         const newHeader = header.cloneNode(true);
         header.parentNode.replaceChild(newHeader, header);
-        
+
         // Set initial arrow direction to right (collapsed state)
-        const icon = newHeader.querySelector('.toggle-icon');
-        if (icon) icon.textContent = '►';
-        
+        const icon = newHeader.querySelector(".toggle-icon");
+        if (icon) icon.textContent = "►";
+
         // Add click handler
-        newHeader.addEventListener('click', () => {
+        newHeader.addEventListener("click", () => {
           const content = newHeader.nextElementSibling;
-          const icon = newHeader.querySelector('.toggle-icon');
-          
-          if (content.style.display === 'none') {
-            content.style.display = 'block';
-            if (icon) icon.textContent = '▼';
+          const icon = newHeader.querySelector(".toggle-icon");
+
+          if (content.style.display === "none") {
+            content.style.display = "block";
+            if (icon) icon.textContent = "▼";
           } else {
-            content.style.display = 'none';
-            if (icon) icon.textContent = '►';
+            content.style.display = "none";
+            if (icon) icon.textContent = "►";
           }
         });
       });
     } catch (error) {
-      this.log('Error setting up collapsible sections:', error.message);
+      this.log("Error setting up collapsible sections:", error.message);
     }
   }
 
   // Download Summary Functionality
   async handleDownloadSummary(data) {
     try {
-      this.log('Starting download process for summary');
-      
-      const downloadButton = document.querySelector('#download-summary');
+      this.log("Starting download process for summary");
+
+      const downloadButton = document.querySelector("#download-summary");
       if (downloadButton) {
         // Show loading state
         const originalContent = downloadButton.innerHTML;
-        downloadButton.innerHTML = '<span class="button-icon">⏳</span> Generating...';
+        downloadButton.innerHTML =
+          '<span class="button-icon">⏳</span> Generating...';
         downloadButton.disabled = true;
       }
 
       // Request HTML generation from background script
       const response = await chrome.runtime.sendMessage({
-        action: 'downloadSummary',
-        data: data
+        action: "downloadSummary",
+        data: data,
       });
 
       if (response.success) {
-        this.log('Download HTML generated successfully');
+        this.log("Download HTML generated successfully");
         this.triggerDownload(response.html, response.filename);
-        this.showDownloadNotification('success', 'Summary downloaded successfully!');
+        this.showDownloadNotification(
+          "success",
+          "Summary downloaded successfully!",
+        );
       } else {
-        throw new Error(response.error || 'Failed to generate download');
+        throw new Error(response.error || "Failed to generate download");
       }
     } catch (error) {
-      this.log('Download failed:', error.message);
-      this.showDownloadNotification('error', `Download failed: ${error.message}`);
+      this.log("Download failed:", error.message);
+      this.showDownloadNotification(
+        "error",
+        `Download failed: ${error.message}`,
+      );
     } finally {
       // Restore button state
-      const downloadButton = document.querySelector('#download-summary');
+      const downloadButton = document.querySelector("#download-summary");
       if (downloadButton) {
-        downloadButton.innerHTML = '<span class="button-icon">💾</span> Download Summary';
+        downloadButton.innerHTML =
+          '<span class="button-icon">💾</span> Download Summary';
         downloadButton.disabled = false;
       }
     }
@@ -1877,41 +2023,43 @@ class YouTubeContentScript {
   triggerDownload(htmlContent, filename) {
     try {
       // Create blob with HTML content
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
       const url = URL.createObjectURL(blob);
-      
+
       // Create temporary download link
-      const downloadLink = document.createElement('a');
+      const downloadLink = document.createElement("a");
       downloadLink.href = url;
       downloadLink.download = filename;
-      downloadLink.style.display = 'none';
-      
+      downloadLink.style.display = "none";
+
       // Trigger download
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      
+
       // Clean up
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      
-      this.log('Download triggered successfully:', filename);
+
+      this.log("Download triggered successfully:", filename);
     } catch (error) {
-      this.log('Failed to trigger download:', error.message);
+      this.log("Failed to trigger download:", error.message);
       throw error;
     }
   }
 
   showDownloadNotification(type, message) {
-    const notification = document.createElement('div');
-    const isSuccess = type === 'success';
-    
+    const notification = document.createElement("div");
+    const isSuccess = type === "success";
+
     notification.style.cssText = `
       position: fixed;
       top: 20px;
       right: 20px;
-      background: ${isSuccess ? 
-        'linear-gradient(135deg, #7ed321, #4ecdc4)' : 
-        'linear-gradient(135deg, #ff6b6b, #ff8e53)'};
+      background: ${
+        isSuccess
+          ? "linear-gradient(135deg, #7ed321, #4ecdc4)"
+          : "linear-gradient(135deg, #ff6b6b, #ff8e53)"
+      };
       color: white;
       padding: 12px 20px;
       border-radius: 8px;
@@ -1922,22 +2070,22 @@ class YouTubeContentScript {
       cursor: pointer;
       max-width: 300px;
     `;
-    
+
     notification.innerHTML = `
-      ${isSuccess ? '✅' : '❌'} ${message}
+      ${isSuccess ? "✅" : "❌"} ${message}
       <br><small>Click to dismiss</small>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Auto-remove after 5 seconds or on click
     const removeNotification = () => {
       if (notification.parentNode) {
         notification.remove();
       }
     };
-    
-    notification.addEventListener('click', removeNotification);
+
+    notification.addEventListener("click", removeNotification);
     setTimeout(removeNotification, 5000);
   }
 }

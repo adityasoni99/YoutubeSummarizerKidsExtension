@@ -9,20 +9,20 @@
   --success-color: #7ed321;
   --warning-color: #f5a623;
   --error-color: #d0021b;
-  
+
   /* Background Colors */
   --bg-primary: #f8f9fa;
   --bg-secondary: #ffffff;
   --bg-accent: #ffe8d6;
   --bg-light: #e8f4f8;
   --bg-dark: #2c3e50;
-  
+
   /* Text Colors */
   --text-primary: #2c3e50;
   --text-secondary: #6c757d;
   --text-light: #adb5bd;
   --text-white: #ffffff;
-  
+
   /* Borders and Shadows */
   --border-radius: 8px;
   --border-radius-large: 12px;
@@ -30,16 +30,16 @@
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
-  
+
   /* Typography */
-  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-base: 16px;
   --font-size-lg: 18px;
   --font-size-xl: 24px;
   --font-size-2xl: 32px;
-  
+
   /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -74,7 +74,11 @@ body {
 
 /* Header */
 .header {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
   color: var(--text-white);
   padding: var(--spacing-xl);
   text-align: center;
@@ -246,7 +250,7 @@ body {
 }
 
 .radio-option input[type="radio"]:checked + .radio-custom::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 3px;
   left: 3px;
@@ -305,7 +309,7 @@ body {
 }
 
 .checkbox-option input[type="checkbox"]:checked + .checkbox-custom::after {
-  content: '✓';
+  content: "✓";
   position: absolute;
   top: -2px;
   left: 2px;
@@ -382,7 +386,11 @@ body {
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--accent-color)
+  );
   color: var(--text-white);
   box-shadow: var(--shadow-sm);
 }
@@ -551,7 +559,7 @@ body.high-contrast {
 }
 
 .section-planned::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -636,26 +644,26 @@ select:disabled option:not(:first-child) {
     margin: 0;
     border-radius: 0;
   }
-  
+
   .main-content {
     padding: var(--spacing-lg);
   }
-  
+
   .actions {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .footer-links {
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-md);
   }
-  
+
   .radio-group {
     gap: var(--spacing-sm);
   }
-  
+
   .status-message {
     position: relative;
     top: 0;
