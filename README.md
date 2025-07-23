@@ -614,6 +614,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for kids and parents everywhere**
 
-[🌟 Star this project](https://github.com/your-repo) • [🐛 Report Bug](https://github.com/your-repo/issues) • [💡 Request Feature](https://github.com/your-repo/issues)
+[🌟 Star this project](https://github.com/adityasoni99) • [🐛 Report Bug](https://github.com/adityasoni99/issues) • [💡 Request Feature](https://github.com/adityasoni99/issues)
 
 </div>
