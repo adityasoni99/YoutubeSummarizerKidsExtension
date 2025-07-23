@@ -614,6 +614,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for kids and parents everywhere**
 
-[🌟 Star this project]([https://github.com/adityasoni99](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension)) • [🐛 Report Bug]([https://github.com/adityasoni99/issues](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension/issues)) • [💡 Request Feature]([https://github.com/adityasoni99/issues](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension/issues))
+[🌟 Star this project](https://github.com/adityasoni99](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension) • [🐛 Report Bug](https://github.com/adityasoni99/issues) • [💡 Request Feature](https://github.com/adityasoni99/issues](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension/issues)
 
 </div>
