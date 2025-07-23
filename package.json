@@ -45,7 +45,7 @@
     "jest-chrome": "^0.8.0",
     "jest-environment-jsdom": "^27.5.1",
     "prettier": "^3.0.0",
-    "puppeteer": "^21.5.0"
+    "puppeteer": "^24.15.0"
   },
   "engines": {
     "node": ">=16.0.0"
