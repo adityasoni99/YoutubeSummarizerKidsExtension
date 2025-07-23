@@ -95,7 +95,7 @@ Following PocketFlow's node-based architecture with two-phase processing:
 
 1. **Clone/Download** this repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/adityasoni99/YoutubeSummarizerKidsExtension.git
    cd youtube-summarizer-extension
    ```
 
@@ -550,8 +550,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Getting Help
 
 - 📖 **Documentation**: Check this README and inline comments
-- 🐛 **Issues**: [Report bugs](https://github.com/your-repo/issues) on GitHub
-- 💡 **Feature Requests**: [Suggest improvements](https://github.com/your-repo/issues) 
+- 🐛 **Issues**: [Report bugs](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension/issues) on GitHub
+- 💡 **Feature Requests**: [Suggest improvements](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension/issues) 
 - 📧 **Contact**: [Your contact information]
 
 ### Common Issues
@@ -614,6 +614,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for kids and parents everywhere**
 
-[🌟 Star this project](https://github.com/your-repo) • [🐛 Report Bug](https://github.com/your-repo/issues) • [💡 Request Feature](https://github.com/your-repo/issues)
+[🌟 Star this project](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension) • [🐛 Report Bug](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension/issues) • [💡 Request Feature](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension/issues)
 
 </div>
