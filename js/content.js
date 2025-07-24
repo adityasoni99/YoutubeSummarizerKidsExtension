@@ -16,19 +16,27 @@ class YouTubeContentScript {
 
     // Initialize current video ID
     this.currentVideoId = this.extractVideoId(window.location.href);
+    this.log("Initial video ID:", this.currentVideoId);
 
     this.setupMessageListener();
     this.setupStorageListener(); // Listen for setting changes
-    // Wait for page to load before adding button (respect auto-detect setting)
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", () => {
-        this.checkAutoDetectSetting(() => this.addSummaryButton());
-      });
+    
+    // Only add button if we're on a video page initially
+    if (this.currentVideoId) {
+      // Wait for page to load before adding button (respect auto-detect setting)
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () => {
+          this.checkAutoDetectSetting(() => this.addSummaryButton());
+        });
+      } else {
+        this.checkAutoDetectSetting(() => {
+          setTimeout(() => this.addSummaryButton(), 2000);
+        });
+      }
     } else {
-      this.checkAutoDetectSetting(() => {
-        setTimeout(() => this.addSummaryButton(), 2000);
-      });
+      this.log("Not on a video page initially, waiting for navigation...");
     }
+    
     this.observeVideoChanges();
   }
   log(message, data = null) {
