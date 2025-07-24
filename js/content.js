@@ -851,54 +851,65 @@ class YouTubeContentScript {
 
     const optionsButton = showOptions
       ? `
-      <div style="margin-top: 16px;">
-        <button onclick="chrome.runtime.openOptionsPage()" style="
-          background: #ff9f43;
+    <div style="margin-top: 16px;">
+      <button id="yt-summarizer-options-btn" style="
+        background: #ff9f43;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+      ">Open Extension Options</button>
+    </div>
+  `
+      : "";
+
+    errorPanel.innerHTML = `
+    <div class="panel-header error">
+      <h3>❌ Oops! Something went wrong</h3>
+      <button class="close-btn" onclick="this.parentElement.parentElement.remove()">×</button>
+    </div>
+    <div class="panel-content">
+      <p><strong>Error:</strong> ${message}</p>
+      <div class="error-help">
+        <p><strong>Troubleshooting Steps:</strong></p>
+        <ul>
+          <li>Make sure you have a Gemini API key configured in extension options</li>
+          <li>Try refreshing the page and clicking the button again</li>
+          <li>Try a different educational video that might have captions or description</li>
+          <li>Check that the video is publicly available and not age-restricted</li>
+          <li>Make sure your internet connection is stable</li>
+        </ul>
+      </div>
+      ${optionsButton}
+      <div style="margin-top: 16px; text-align: center;">
+        <button onclick="location.reload()" style="
+          background: #4ecdc4;
           color: white;
           border: none;
           padding: 8px 16px;
           border-radius: 6px;
           cursor: pointer;
           font-weight: 600;
-        ">Open Extension Options</button>
+          margin-right: 8px;
+        ">Try Again</button>
       </div>
-    `
-      : "";
-
-    errorPanel.innerHTML = `
-      <div class="panel-header error">
-        <h3>❌ Oops! Something went wrong</h3>
-        <button class="close-btn" onclick="this.parentElement.parentElement.remove()">×</button>
-      </div>
-      <div class="panel-content">
-        <p><strong>Error:</strong> ${message}</p>
-        <div class="error-help">
-          <p><strong>Troubleshooting Steps:</strong></p>
-          <ul>
-            <li>Make sure you have a Gemini API key configured in extension options</li>
-            <li>Try refreshing the page and clicking the button again</li>
-            <li>Try a different educational video that might have captions or description</li>
-            <li>Check that the video is publicly available and not age-restricted</li>
-            <li>Make sure your internet connection is stable</li>
-          </ul>
-        </div>
-        ${optionsButton}
-        <div style="margin-top: 16px; text-align: center;">
-          <button onclick="location.reload()" style="
-            background: #4ecdc4;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-right: 8px;
-          ">Try Again</button>
-        </div>
-      </div>
-    `;
+    </div>
+  `;
 
     this.insertSummaryPanel(errorPanel);
+    
+    // Add event listener for options button if it exists
+    if (showOptions) {
+      const optionsBtn = errorPanel.querySelector('#yt-summarizer-options-btn');
+      if (optionsBtn) {
+        optionsBtn.addEventListener('click', () => {
+          // Send message to background script to open options page
+          chrome.runtime.sendMessage({action: 'openOptions'});
+        });
+      }
+    }
   }
 
   displaySummary(data) {
