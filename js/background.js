@@ -5,7 +5,7 @@ class YouTubeSummarizerFlow {
   constructor() {
     this.shared = {};
     this.apiKey = null;
-    this.debugMode = true;
+    this.debugMode = false; // Disabled for production
   }
 
   log(message, data = null) {
@@ -751,7 +751,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 class SummaryDownloadManager {
   constructor() {
-    this.debugMode = true;
+    this.debugMode = false; // Disabled for production
   }
 
   log(message, data = null) {
@@ -764,7 +764,7 @@ class SummaryDownloadManager {
     if (!text || typeof text !== "string") return text;
 
     // Convert line breaks to <br> tags
-    let formattedText = text.replace(/\n/g, "<br>");
+    const formattedText = text.replace(/\n/g, "<br>");
 
     // Convert bullet points (* text) to proper HTML lists
     const bulletRegex = /\* ([^*\n]+)/g;

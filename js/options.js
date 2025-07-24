@@ -5,11 +5,7 @@ class OptionsController {
     this.defaultSettings = {
       geminiApiKey: "",
       defaultAge: "6-8",
-      // Planned features (disabled for now)
-      // largeFonts: false,
-      // highContrast: false,
-      // textToSpeech: false,
-      // summaryLanguage: 'en',
+
       maxTopics: 5,
       summaryLength: "medium",
       autoSummarize: true, // Auto-detect new videos by default
@@ -36,13 +32,7 @@ class OptionsController {
       );
       if (ageRadio) ageRadio.checked = true;
 
-      // Accessibility (disabled features - keep for future use but don't make functional)
-      // document.getElementById('large-fonts').checked = settings.largeFonts;
-      // document.getElementById('high-contrast').checked = settings.highContrast;
-      // document.getElementById('text-to-speech').checked = settings.textToSpeech;
 
-      // Language (disabled feature - keep for future use but don't make functional)
-      // document.getElementById('summary-language').value = settings.summaryLanguage;
 
       // Advanced
       document.getElementById("max-topics").value = settings.maxTopics;

@@ -4,7 +4,7 @@ class PopupController {
   constructor() {
     this.currentTab = null;
     this.isProcessing = false;
-    this.debugMode = true; // Enable for troubleshooting
+    this.debugMode = false; // Disabled for production
     this.init();
   }
 
