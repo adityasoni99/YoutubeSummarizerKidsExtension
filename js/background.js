@@ -211,17 +211,9 @@ Only include valid JSON in your response.`;
       );
       return { success: true, count: this.shared.topics.length };
     } catch (error) {
-      this.log("Topic generation failed, using fallback:", error.message);
-      // Fallback: create a single topic with the content
-      this.shared.topics = [
-        {
-          id: 1,
-          name: "Main Content",
-          content: `This video "${this.shared.videoInfo.title}" discusses various educational topics that can be explained in a kid-friendly way.`,
-        },
-      ];
-      this.shared.initialSummary = `This video "${this.shared.videoInfo.title}" contains educational content that can be fun to learn about!`;
-      return { success: true, count: 1, fallback: true };
+      this.log("Topic generation failed:", error.message);
+      // Re-throw the error instead of using fallback to ensure API key validation
+      throw error;
     }
   }
 

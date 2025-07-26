@@ -616,7 +616,7 @@
 
 .error-help h4,
 .error-help p {
-  color: var(--yt-summarizer-text-white);
+  color: var(--yt-summarizer-text-primary);
   margin-bottom: 8px;
 }
 
@@ -626,7 +626,7 @@
 }
 
 .error-help li {
-  color: var(--yt-summarizer-text-white);
+  color: var(--yt-summarizer-text-primary);
   margin-bottom: 4px;
   opacity: 0.9;
 }
