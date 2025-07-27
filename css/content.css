@@ -292,6 +292,21 @@
   line-height: 1.7;
 }
 
+.summary ul {
+  color: var(--yt-summarizer-text-primary);
+  font-size: var(--yt-summarizer-font-size-medium);
+  line-height: 1.7;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.summary li {
+  color: var(--yt-summarizer-text-primary);
+  font-size: var(--yt-summarizer-font-size-medium);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
 /* Connections Section */
 .connections {
   background: var(--yt-summarizer-bg-light);
