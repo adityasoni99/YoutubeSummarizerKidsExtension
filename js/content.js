@@ -1443,6 +1443,7 @@ class YouTubeContentScript {
       let inList = false;
       let listType = null; // 'ul' or 'ol'
       let result = "";
+      let lastWasList = false;
 
       for (let line of lines) {
         line = line.trim();
@@ -1457,10 +1458,12 @@ class YouTubeContentScript {
             listType = 'ul';
           }
           result += `<li>${this.formatInlineText(content)}</li>`;
+          lastWasList = true;
         }
-        // Check for numbered lists (1. 2. etc.)
+        // Check for numbered lists (any number followed by period)
         else if (line.match(/^\d+\. (.+)/)) {
           const content = line.replace(/^\d+\. /, "").trim();
+          // Continue existing ordered list or start new one
           if (!inList || listType !== 'ol') {
             if (inList) result += `</${listType}>`; // Close previous list
             result += "<ol>";
@@ -1468,17 +1471,28 @@ class YouTubeContentScript {
             listType = 'ol';
           }
           result += `<li>${this.formatInlineText(content)}</li>`;
+          lastWasList = true;
         }
         // Regular content
-        else {
+        else if (line) {
+          // If we just finished a list and this is regular content, close the list
           if (inList) {
             result += `</${listType}>`;
             inList = false;
             listType = null;
           }
-          if (line) {
-            result += `<p>${this.formatInlineText(line)}</p>`;
+          result += `<p>${this.formatInlineText(line)}</p>`;
+          lastWasList = false;
+        }
+        // Empty line - if we're in a list and previous line was also a list item,
+        // treat this as spacing within the list, otherwise close the list
+        else if (!line) {
+          if (inList && !lastWasList) {
+            result += `</${listType}>`;
+            inList = false;
+            listType = null;
           }
+          lastWasList = false;
         }
       }
 
