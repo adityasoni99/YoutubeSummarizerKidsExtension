@@ -1426,30 +1426,55 @@ class YouTubeContentScript {
   formatTextForHTML(text) {
     if (!text || typeof text !== "string") return text;
 
+    // Handle code blocks first (before line break processing)
+    text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+    text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+
     // Convert line breaks to <br> tags
     const formattedText = text.replace(/\n/g, "<br>");
 
-    // Convert bullet points (* text) to proper HTML lists
-    const bulletRegex = /\* ([^*\n]+)/g;
-    if (bulletRegex.test(text)) {
-      // Split by line breaks and process
+    // Check for any lists (bullets or numbered)
+    const hasBullets = /^[*-] /gm.test(text);
+    const hasNumbers = /^\d+\. /gm.test(text);
+    
+    if (hasBullets || hasNumbers) {
+      // Split by line breaks and process lists
       const lines = text.split("\n");
       let inList = false;
+      let listType = null; // 'ul' or 'ol'
       let result = "";
 
       for (let line of lines) {
         line = line.trim();
-        if (line.startsWith("* ")) {
-          if (!inList) {
+        
+        // Check for bullet points (* or -)
+        if (line.match(/^[*-] (.+)/)) {
+          const content = line.replace(/^[*-] /, "").trim();
+          if (!inList || listType !== 'ul') {
+            if (inList) result += `</${listType}>`; // Close previous list
             result += "<ul>";
             inList = true;
+            listType = 'ul';
           }
-          const bulletContent = line.substring(2).trim();
-          result += `<li>${this.formatInlineText(bulletContent)}</li>`;
-        } else {
+          result += `<li>${this.formatInlineText(content)}</li>`;
+        }
+        // Check for numbered lists (1. 2. etc.)
+        else if (line.match(/^\d+\. (.+)/)) {
+          const content = line.replace(/^\d+\. /, "").trim();
+          if (!inList || listType !== 'ol') {
+            if (inList) result += `</${listType}>`; // Close previous list
+            result += "<ol>";
+            inList = true;
+            listType = 'ol';
+          }
+          result += `<li>${this.formatInlineText(content)}</li>`;
+        }
+        // Regular content
+        else {
           if (inList) {
-            result += "</ul>";
+            result += `</${listType}>`;
             inList = false;
+            listType = null;
           }
           if (line) {
             result += `<p>${this.formatInlineText(line)}</p>`;
@@ -1458,13 +1483,13 @@ class YouTubeContentScript {
       }
 
       if (inList) {
-        result += "</ul>";
+        result += `</${listType}>`;
       }
 
       return result;
     }
 
-    // If no bullet points, just format inline text and preserve line breaks
+    // If no lists, just format inline text and preserve line breaks
     return formattedText
       .split("<br>")
       .map((line) => {
@@ -1478,11 +1503,20 @@ class YouTubeContentScript {
   formatInlineText(text) {
     if (!text) return text;
 
+    // Handle code first to avoid conflicts
+    text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+
     // Convert ALL CAPS words to bold (common pattern in the text)
     text = text.replace(/\b[A-Z]{2,}\b/g, "<strong>$&</strong>");
 
-    // Convert text between asterisks to bold
-    text = text.replace(/\*([^*]+)\*/g, "<strong>$1</strong>");
+    // Convert **bold** text (double asterisks) first
+    text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    
+    // Convert remaining single *italic* text (avoiding already processed bold)
+    text = text.replace(/\b\*([^*\s][^*]*?)\*\b/g, "<em>$1</em>");
+    
+    // Convert _italic_ text (underscores)
+    text = text.replace(/_([^_\s][^_]*[^_\s]|[^_\s])_/g, "<em>$1</em>");
 
     // Convert text in quotes to emphasis
     text = text.replace(/"([^"]+)"/g, '<em>"$1"</em>');
