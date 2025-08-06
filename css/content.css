@@ -62,7 +62,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: var(--yt-summarizer-shadow-light);
-  z-index: 1000;
+  z-index: 1200;
   position: relative;
 }
 
@@ -1045,13 +1045,13 @@ html[system-theme="dark"] .topic-content {
 #yt-summarizer-btn {
   min-width: 180px !important;
   text-align: center !important;
-  z-index: 9999 !important;
+  z-index: 1200;
 }
 
 /* Ensure summary panel is always visible */
 .yt-summarizer-panel {
   position: relative !important;
-  z-index: 100 !important;
+  z-index: 1200;
   clear: both !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -1068,7 +1068,7 @@ html[system-theme="dark"] .topic-content {
 .yt-summarizer-button[style*="position: fixed"] {
   top: 120px !important;
   right: 20px !important;
-  z-index: 10000 !important;
+  z-index: 1200;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
