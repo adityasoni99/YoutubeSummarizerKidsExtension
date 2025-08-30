@@ -744,7 +744,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // Install/startup handler
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("YouTube Summarizer for Kids extension installed");
+  // Extension installed - ready for production
 });
 
 class SummaryDownloadManager {
