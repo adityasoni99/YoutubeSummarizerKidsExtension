@@ -596,7 +596,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 📖 **Documentation**: Check this README and inline comments
 - 🐛 **Issues**: [Report bugs](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension/issues) on GitHub
 - 💡 **Feature Requests**: [Suggest improvements](https://github.com/adityasoni99/YoutubeSummarizerKidsExtension/issues)
-- 📧 **Contact**: [Your contact information]
+- 📧 **Contact**: meetxgroq@gmail.com
 
 ### Common Issues
 
