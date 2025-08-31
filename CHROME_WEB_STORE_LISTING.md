@@ -63,7 +63,7 @@ youtube, kids, education, summary, learning, children, safe, educational, videos
 
 ## Support Information
 **Website:** https://github.com/adityasoni99/YoutubeSummarizerKidsExtension  
-**Support Email:** meetxgroq@gmail.com 
+**Support Email:** meetxgroq@gmail.com
 **Privacy Policy:** Required (see PRIVACY_POLICY.md)
 
 ## Permissions Justification
